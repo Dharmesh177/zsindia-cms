@@ -32,11 +32,18 @@ export default function Home() {
             Professional product authoring and QR verification platform for ZSAcoustics sound engineering products
           </p>
 
-          <Link href="/dashboard">
-            <Button size="lg" className="text-lg px-10 py-7 bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-2xl transition-all">
-              Access Admin Portal
-            </Button>
-          </Link>
+          <div className="flex gap-4 justify-center">
+            <Link href="/login">
+              <Button size="lg" className="text-lg px-10 py-7 bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:shadow-2xl transition-all">
+                Admin Sign In
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button size="lg" variant="outline" className="text-lg px-10 py-7 border-2 border-white text-white hover:bg-white/10 shadow-xl hover:shadow-2xl transition-all">
+                View Dashboard
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto mt-20">

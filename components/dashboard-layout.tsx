@@ -5,18 +5,24 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { LayoutDashboard, Package, QrCode, Menu } from 'lucide-react';
+import { LayoutDashboard, Package, QrCode, Menu, MessageSquare, Star, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/auth-context';
+import { ProtectedRoute } from './protected-route';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/dashboard/products', icon: Package },
   { name: 'Generate QR', href: '/dashboard/verify-product', icon: QrCode },
+  { name: 'Contact Queries', href: '/dashboard/queries', icon: MessageSquare },
+  { name: 'Testimonials', href: '/dashboard/testimonials', icon: Star },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { signOut, user } = useAuth();
 
   return (
+    <ProtectedRoute>
     <div className="flex min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 border-r bg-gradient-to-b from-blue-600 to-blue-800 shadow-xl">
         <div className="flex items-center h-20 px-6 border-b border-blue-500">
@@ -49,7 +55,19 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-blue-500">
+        <div className="p-4 border-t border-blue-500 space-y-3">
+          <div className="text-xs text-blue-200 text-center mb-2">
+            <p className="font-medium">{user?.name}</p>
+            <p className="text-blue-300 mt-1">{user?.email}</p>
+          </div>
+          <Button
+            variant="ghost"
+            className="w-full text-white hover:bg-blue-700 hover:text-white"
+            onClick={() => signOut()}
+          >
+            <LogOut className="mr-3 h-5 w-5" />
+            Sign Out
+          </Button>
           <p className="text-xs text-blue-200 text-center">Sound Engineering Excellence</p>
         </div>
       </aside>
@@ -105,5 +123,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <main className="p-6">{children}</main>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
