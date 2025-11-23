@@ -53,7 +53,8 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const data = await api.getProducts();
+      const response = await api.getProducts();
+      const data = response; // Extract the products array
       setProducts(data);
       setFilteredProducts(data);
     } catch (error) {

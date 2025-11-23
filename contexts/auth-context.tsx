@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type User = {
-  id: string;
   name: string;
   email: string;
 };
@@ -38,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/users/login`, {
+      const response = await fetch(`${API_URL}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,9 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const userData = {
-        id: data.user._id || data.user.id,
-        name: data.user.name,
-        email: data.user.email,
+        name: email,
+        email: password,
       };
 
       localStorage.setItem('user', JSON.stringify(userData));
@@ -71,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (name: string, email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/users`, {
+      const response = await fetch(`${API_URL}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
-    router.push('/login');
+    router.push('/user/signin');
   };
 
   const value = {

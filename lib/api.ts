@@ -2,7 +2,7 @@ import { dummyProducts } from './dummy-data';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://zoom-sounds-backend.onrender.com/api/v1';
 
-const USE_DUMMY_DATA = true;
+const USE_DUMMY_DATA = false;
 
 export interface Product {
   _id: string;
@@ -50,19 +50,37 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const api = {
   async getProducts(): Promise<Product[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
     if (USE_DUMMY_DATA) {
       await delay(300);
       return [...localProducts];
     }
 
-    const response = await fetch(`${API_URL}/products`);
+    const response = await fetch(`${API_URL}/products`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache',
+      },
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
-    return response.json();
+
+    const data = await response.json();
+    return data.products; // Explicitly return the products array
   },
 
   async getProduct(id: string): Promise<Product> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
     if (USE_DUMMY_DATA) {
       await delay(200);
       const product = localProducts.find(p => p._id === id);
@@ -72,7 +90,12 @@ export const api = {
       return { ...product };
     }
 
-    const response = await fetch(`${API_URL}/products/${id}`);
+    const response = await fetch(`${API_URL}/products/${id}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
@@ -80,6 +103,11 @@ export const api = {
   },
 
   async createProduct(product: ProductInput): Promise<Product> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
     if (USE_DUMMY_DATA) {
       await delay(400);
       const newProduct: Product = {
@@ -95,6 +123,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(product),
@@ -106,6 +135,11 @@ export const api = {
   },
 
   async updateProduct(id: string, product: Partial<ProductInput>): Promise<Product> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
     if (USE_DUMMY_DATA) {
       await delay(400);
       const index = localProducts.findIndex(p => p._id === id);
@@ -128,6 +162,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'PUT',
       headers: {
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(product),
@@ -139,6 +174,11 @@ export const api = {
   },
 
   async deleteProduct(id: string): Promise<void> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
     if (USE_DUMMY_DATA) {
       await delay(300);
       localProducts = localProducts.filter(p => p._id !== id);
@@ -147,6 +187,10 @@ export const api = {
 
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     });
     if (!response.ok) {
       throw new Error('Failed to delete product');

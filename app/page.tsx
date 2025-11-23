@@ -39,7 +39,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link href="/dashboard">
-              <Button size="lg" variant="outline" className="text-lg px-10 py-7 border-2 border-white text-white hover:bg-white/10 shadow-xl hover:shadow-2xl transition-all">
+              <Button size="lg" variant="outline" className="text-lg px-10 py-7 border-2 border-white bg-white text-black hover:bg-white/10 shadow-xl hover:shadow-2xl transition-all">
                 View Dashboard
               </Button>
             </Link>
