@@ -4,7 +4,7 @@ function getAuthHeaders() {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...(token ? { 'token': `${token}` } : {}),
   };
 }
 
@@ -32,7 +32,7 @@ export type Testimonial = {
 
 export const contactQueriesApi = {
   getAll: async (): Promise<ContactQuery[]> => {
-    const response = await fetch(`${API_URL}/contact-queries`, {
+    const response = await fetch(`${API_URL}/query`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch queries');
@@ -41,7 +41,7 @@ export const contactQueriesApi = {
   },
 
   updateStatus: async (id: string, status: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/contact-queries/${id}`, {
+    const response = await fetch(`${API_URL}/query/${id}`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify({ status }),
@@ -50,7 +50,7 @@ export const contactQueriesApi = {
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/contact-queries/${id}`, {
+    const response = await fetch(`${API_URL}/query/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
@@ -60,7 +60,7 @@ export const contactQueriesApi = {
 
 export const testimonialsApi = {
   getAll: async (): Promise<Testimonial[]> => {
-    const response = await fetch(`${API_URL}/testimonials`, {
+    const response = await fetch(`${API_URL}/testinomial/all`, {
       headers: getAuthHeaders(),
     });
     if (!response.ok) throw new Error('Failed to fetch testimonials');
@@ -69,7 +69,7 @@ export const testimonialsApi = {
   },
 
   create: async (testimonial: Omit<Testimonial, '_id' | 'createdAt' | 'updatedAt'>): Promise<Testimonial> => {
-    const response = await fetch(`${API_URL}/testimonials`, {
+    const response = await fetch(`${API_URL}/testinomial`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(testimonial),
@@ -80,8 +80,8 @@ export const testimonialsApi = {
   },
 
   update: async (id: string, testimonial: Partial<Testimonial>): Promise<void> => {
-    const response = await fetch(`${API_URL}/testimonials/${id}`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_URL}/testinomial/${id}`, {
+      method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify(testimonial),
     });
@@ -89,8 +89,8 @@ export const testimonialsApi = {
   },
 
   toggleApproval: async (id: string, approved: boolean): Promise<void> => {
-    const response = await fetch(`${API_URL}/testimonials/${id}`, {
-      method: 'PATCH',
+    const response = await fetch(`${API_URL}/testinomial/approve/${id}`, {
+      method: 'PUT',
       headers: getAuthHeaders(),
       body: JSON.stringify({ approved: !approved }),
     });
@@ -98,7 +98,7 @@ export const testimonialsApi = {
   },
 
   delete: async (id: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/testimonials/${id}`, {
+    const response = await fetch(`${API_URL}/testinomial/${id}`, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });

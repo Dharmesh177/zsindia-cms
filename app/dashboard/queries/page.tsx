@@ -44,8 +44,8 @@ export default function QueriesPage() {
   const fetchQueries = async () => {
     setLoading(true);
     try {
-      const data = await contactQueriesApi.getAll();
-      setQueries(data || []);
+      const data : any = await contactQueriesApi.getAll();
+      setQueries(data?.getAllReviews || []);
     } catch (error: any) {
       toast.error('Failed to fetch queries', {
         description: error.message,

@@ -63,7 +63,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'token':`${token}`,
         'Cache-Control': 'no-cache',
       },
     });
@@ -93,7 +93,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'token':`${token}`,
       },
     });
     if (!response.ok) {
@@ -123,7 +123,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'token':`${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(product),
@@ -162,7 +162,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'token':`${token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(product),
@@ -188,7 +188,7 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'token':`${token}`,
         'Content-Type': 'application/json',
       },
     });
