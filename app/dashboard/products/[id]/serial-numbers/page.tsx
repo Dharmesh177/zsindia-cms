@@ -42,6 +42,9 @@ export default function SerialNumbersPage() {
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState('');
 
+  // Get the base URL for QR codes
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+
   useEffect(() => {
     fetchData();
   }, [params.id]);
@@ -276,7 +279,7 @@ export default function SerialNumbersPage() {
                       <div className="hidden">
                         <QRCodeSVG
                           id={`qr-${serial._id}`}
-                          value={serial.serialNumber}
+                          value={`${baseUrl}/verify/${serial.serialNumber}`}
                           size={1000}
                           level="H"
                           includeMargin
@@ -344,12 +347,17 @@ export default function SerialNumbersPage() {
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
             {selectedSerial && (
-              <QRCodeSVG
-                value={selectedSerial.serialNumber}
-                size={300}
-                level="H"
-                includeMargin
-              />
+              <>
+                <QRCodeSVG
+                  value={`${baseUrl}/verify/${selectedSerial.serialNumber}`}
+                  size={300}
+                  level="H"
+                  includeMargin
+                />
+                <p className="text-sm text-gray-600 text-center max-w-xs break-all">
+                  {baseUrl}/verify/{selectedSerial.serialNumber}
+                </p>
+              </>
             )}
             <Button onClick={() => selectedSerial && downloadQR(selectedSerial)}>
               <Download className="mr-2 h-4 w-4" />

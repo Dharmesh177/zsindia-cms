@@ -1,8 +1,15 @@
 import { dummyProducts } from './dummy-data';
+import { dummySerialNumbers, generateDummySerialNumbers } from './dummy-serial-numbers';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://zoom-sounds-backend.onrender.com/api/v1';
 
 const USE_DUMMY_DATA = false;
+
+// Temporary: Use dummy data for serial numbers until backend is updated
+const USE_DUMMY_SERIAL_DATA = true;
+
+// In-memory storage for dummy serial numbers
+let localSerialNumbers = [...dummySerialNumbers];
 
 export interface SerialNumber {
   _id: string;
@@ -308,6 +315,16 @@ export const api = {
   },
 
   async generateSerialNumbers(productId: string, quantity: number, batchNumber?: string): Promise<SerialNumber[]> {
+    // TEMPORARY: Using dummy data until backend is updated
+    if (USE_DUMMY_SERIAL_DATA) {
+      await delay(500);
+      const newSerials = generateDummySerialNumbers(productId, quantity, batchNumber);
+      localSerialNumbers = [...newSerials, ...localSerialNumbers];
+      return newSerials;
+    }
+
+    // COMMENTED OUT: Uncomment when backend is ready
+    /*
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -328,9 +345,19 @@ export const api = {
 
     const data = await response.json();
     return data.serialNumbers;
+    */
+    return [];
   },
 
   async getProductSerialNumbers(productId: string): Promise<SerialNumber[]> {
+    // TEMPORARY: Using dummy data until backend is updated
+    if (USE_DUMMY_SERIAL_DATA) {
+      await delay(300);
+      return localSerialNumbers.filter(s => s.productId === productId);
+    }
+
+    // COMMENTED OUT: Uncomment when backend is ready
+    /*
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -349,9 +376,23 @@ export const api = {
 
     const data = await response.json();
     return data.serialNumbers || [];
+    */
+    return [];
   },
 
   async deactivateSerialNumber(serialNumberId: string): Promise<void> {
+    // TEMPORARY: Using dummy data until backend is updated
+    if (USE_DUMMY_SERIAL_DATA) {
+      await delay(300);
+      const index = localSerialNumbers.findIndex(s => s._id === serialNumberId);
+      if (index !== -1) {
+        localSerialNumbers[index].status = 'deactivated';
+      }
+      return;
+    }
+
+    // COMMENTED OUT: Uncomment when backend is ready
+    /*
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -368,9 +409,50 @@ export const api = {
     if (!response.ok) {
       throw new Error('Failed to deactivate serial number');
     }
+    */
   },
 
   async verifySerialNumber(serialNumber: string): Promise<{ valid: boolean; product?: Product; serialData?: SerialNumber }> {
+    // TEMPORARY: Using dummy data until backend is updated
+    if (USE_DUMMY_SERIAL_DATA) {
+      await delay(500);
+      const serial = localSerialNumbers.find(s => s.serialNumber === serialNumber);
+
+      if (!serial || serial.status === 'deactivated') {
+        return { valid: false };
+      }
+
+      // Update verification count
+      const index = localSerialNumbers.findIndex(s => s.serialNumber === serialNumber);
+      if (index !== -1) {
+        localSerialNumbers[index].verifiedCount += 1;
+        if (!localSerialNumbers[index].isVerified) {
+          localSerialNumbers[index].isVerified = true;
+          localSerialNumbers[index].verifiedAt = new Date().toISOString();
+        }
+      }
+
+      // Get product (from dummy or real data)
+      let product: Product | undefined;
+      try {
+        if (USE_DUMMY_DATA) {
+          product = localProducts.find(p => p._id === serial.productId);
+        } else {
+          product = await this.getProduct(serial.productId);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
+
+      return {
+        valid: true,
+        product,
+        serialData: serial,
+      };
+    }
+
+    // COMMENTED OUT: Uncomment when backend is ready
+    /*
     const response = await fetch(`${API_URL}/serial-numbers/verify/${serialNumber}`, {
       method: 'GET',
     });
@@ -381,5 +463,7 @@ export const api = {
 
     const data = await response.json();
     return data;
+    */
+    return { valid: false };
   },
 };

@@ -187,7 +187,7 @@ export default function ViewProductPage() {
         </CardContent>
       </Card>
 
-      {product.keyHighlights.length > 0 && (
+      {product.keyHighlights && product.keyHighlights.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Key Highlights</CardTitle>
@@ -204,7 +204,7 @@ export default function ViewProductPage() {
         </Card>
       )}
 
-      {product.features.length > 0 && (
+      {product.features && product.features.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Features</CardTitle>
@@ -226,59 +226,59 @@ export default function ViewProductPage() {
           <CardTitle>Technical Specifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {product.specifications.powerOutput && (
+          {product.specifications?.powerOutput && (
             <div className="flex justify-between">
               <span className="font-medium">Power Output:</span>
               <span className="text-gray-700">{product.specifications.powerOutput}</span>
             </div>
           )}
-          {product.specifications.channels && (
+          {product.specifications?.channels && (
             <div className="flex justify-between">
               <span className="font-medium">Channels:</span>
               <span className="text-gray-700">{product.specifications.channels}</span>
             </div>
           )}
-          {product.specifications.inputChannels && (
+          {product.specifications?.inputChannels && (
             <div className="flex justify-between">
               <span className="font-medium">Input Channels:</span>
               <span className="text-gray-700">{product.specifications.inputChannels}</span>
             </div>
           )}
-          {product.specifications.digitalPlayer && (
+          {product.specifications?.digitalPlayer && (
             <div className="flex justify-between">
               <span className="font-medium">Digital Player:</span>
               <span className="text-gray-700">{product.specifications.digitalPlayer}</span>
             </div>
           )}
-          {(product.specifications.toneControl?.bass ||
-            product.specifications.toneControl?.mid ||
-            product.specifications.toneControl?.treble) && (
+          {(product.specifications?.toneControl?.bass ||
+            product.specifications?.toneControl?.mid ||
+            product.specifications?.toneControl?.treble) && (
             <>
               <Separator />
               <div className="space-y-2">
                 <p className="font-medium">Tone Control:</p>
                 <div className="ml-4 space-y-1">
-                  {product.specifications.toneControl?.bass && (
+                  {product.specifications?.toneControl?.bass && (
                     <div className="flex justify-between">
                       <span>Bass:</span>
                       <span className="text-gray-700">
-                        {product.specifications.toneControl.bass}
+                        {product.specifications?.toneControl?.bass}
                       </span>
                     </div>
                   )}
-                  {product.specifications.toneControl?.mid && (
+                  {product.specifications?.toneControl?.mid && (
                     <div className="flex justify-between">
                       <span>Mid:</span>
                       <span className="text-gray-700">
-                        {product.specifications.toneControl.mid}
+                        {product.specifications?.toneControl?.mid}
                       </span>
                     </div>
                   )}
-                  {product.specifications.toneControl?.treble && (
+                  {product.specifications?.toneControl?.treble && (
                     <div className="flex justify-between">
                       <span>Treble:</span>
                       <span className="text-gray-700">
-                        {product.specifications.toneControl.treble}
+                        {product.specifications?.toneControl?.treble}
                       </span>
                     </div>
                   )}
@@ -286,46 +286,46 @@ export default function ViewProductPage() {
               </div>
             </>
           )}
-          {product.specifications.speakerOutput && (
+          {product.specifications?.speakerOutput && (
             <div className="flex justify-between">
               <span className="font-medium">Speaker Output:</span>
-              <span className="text-gray-700">{product.specifications.speakerOutput}</span>
+              <span className="text-gray-700">{product.specifications?.speakerOutput}</span>
             </div>
           )}
-          {product.specifications.frequencyResponse && (
+          {product.specifications?.frequencyResponse && (
             <div className="flex justify-between">
               <span className="font-medium">Frequency Response:</span>
-              <span className="text-gray-700">{product.specifications.frequencyResponse}</span>
+              <span className="text-gray-700">{product.specifications?.frequencyResponse}</span>
             </div>
           )}
-          {product.specifications.snRatio && (
+          {product.specifications?.snRatio && (
             <div className="flex justify-between">
               <span className="font-medium">S/N Ratio:</span>
-              <span className="text-gray-700">{product.specifications.snRatio}</span>
+              <span className="text-gray-700">{product.specifications?.snRatio}</span>
             </div>
           )}
-          {product.specifications.powerSupply && (
+          {product.specifications?.powerSupply && (
             <div className="flex justify-between">
               <span className="font-medium">Power Supply:</span>
-              <span className="text-gray-700">{product.specifications.powerSupply}</span>
+              <span className="text-gray-700">{product.specifications?.powerSupply}</span>
             </div>
           )}
-          {product.specifications.dimensions && (
+          {product.specifications?.dimensions && (
             <div className="flex justify-between">
               <span className="font-medium">Dimensions:</span>
-              <span className="text-gray-700">{product.specifications.dimensions}</span>
+              <span className="text-gray-700">{product.specifications?.dimensions}</span>
             </div>
           )}
-          {product.specifications.weight && (
+          {product.specifications?.weight && (
             <div className="flex justify-between">
               <span className="font-medium">Weight:</span>
-              <span className="text-gray-700">{product.specifications.weight}</span>
+              <span className="text-gray-700">{product.specifications?.weight}</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {product.applications.length > 0 && (
+      {product.applications && product.applications.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Applications</CardTitle>
@@ -342,7 +342,7 @@ export default function ViewProductPage() {
         </Card>
       )}
 
-      {product.idealFor.length > 0 && (
+      {product.idealFor && product.idealFor.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Ideal For</CardTitle>
@@ -359,7 +359,7 @@ export default function ViewProductPage() {
         </Card>
       )}
 
-      {product.tags.length > 0 && (
+      {product.tags && product.tags.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Tags</CardTitle>

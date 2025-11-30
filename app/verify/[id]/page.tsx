@@ -145,7 +145,7 @@ export default function VerifyPage() {
               <p className="text-gray-700 whitespace-pre-wrap">{product.overview}</p>
             </div>
 
-            {product.keyHighlights.length > 0 && (
+            {product.keyHighlights && product.keyHighlights.length > 0 && (
               <div>
                 <h3 className="font-semibold text-lg mb-2">Key Highlights</h3>
                 <ul className="list-disc list-inside space-y-1">
@@ -158,7 +158,7 @@ export default function VerifyPage() {
               </div>
             )}
 
-            {product.features.length > 0 && (
+            {product.features && product.features.length > 0 && (
               <div>
                 <h3 className="font-semibold text-lg mb-2">Features</h3>
                 <ul className="list-disc list-inside space-y-1">
@@ -176,61 +176,61 @@ export default function VerifyPage() {
             <div>
               <h3 className="font-semibold text-lg mb-4">Technical Specifications</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {product.specifications.powerOutput && (
+                {product.specifications?.powerOutput && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Power Output</span>
                     <span className="font-medium">{product.specifications.powerOutput}</span>
                   </div>
                 )}
-                {product.specifications.channels && (
+                {product.specifications?.channels && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Channels</span>
                     <span className="font-medium">{product.specifications.channels}</span>
                   </div>
                 )}
-                {product.specifications.inputChannels && (
+                {product.specifications?.inputChannels && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Input Channels</span>
                     <span className="font-medium">{product.specifications.inputChannels}</span>
                   </div>
                 )}
-                {product.specifications.digitalPlayer && (
+                {product.specifications?.digitalPlayer && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Digital Player</span>
                     <span className="font-medium">{product.specifications.digitalPlayer}</span>
                   </div>
                 )}
-                {product.specifications.speakerOutput && (
+                {product.specifications?.speakerOutput && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Speaker Output</span>
                     <span className="font-medium">{product.specifications.speakerOutput}</span>
                   </div>
                 )}
-                {product.specifications.frequencyResponse && (
+                {product.specifications?.frequencyResponse && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Frequency Response</span>
                     <span className="font-medium">{product.specifications.frequencyResponse}</span>
                   </div>
                 )}
-                {product.specifications.snRatio && (
+                {product.specifications?.snRatio && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">S/N Ratio</span>
                     <span className="font-medium">{product.specifications.snRatio}</span>
                   </div>
                 )}
-                {product.specifications.powerSupply && (
+                {product.specifications?.powerSupply && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Power Supply</span>
                     <span className="font-medium">{product.specifications.powerSupply}</span>
                   </div>
                 )}
-                {product.specifications.dimensions && (
+                {product.specifications?.dimensions && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Dimensions</span>
                     <span className="font-medium">{product.specifications.dimensions}</span>
                   </div>
                 )}
-                {product.specifications.weight && (
+                {product.specifications?.weight && (
                   <div className="flex flex-col">
                     <span className="text-sm text-gray-500">Weight</span>
                     <span className="font-medium">{product.specifications.weight}</span>
@@ -239,7 +239,7 @@ export default function VerifyPage() {
               </div>
             </div>
 
-            {product.applications.length > 0 && (
+            {product.applications && product.applications.length > 0 && (
               <div>
                 <h3 className="font-semibold text-lg mb-2">Applications</h3>
                 <div className="flex flex-wrap gap-2">
@@ -252,7 +252,7 @@ export default function VerifyPage() {
               </div>
             )}
 
-            {product.idealFor.length > 0 && (
+            {product.idealFor && product.idealFor.length > 0 && (
               <div>
                 <h3 className="font-semibold text-lg mb-2">Ideal For</h3>
                 <div className="flex flex-wrap gap-2">
