@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -20,6 +21,7 @@ const navigation = [
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { signOut, user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <ProtectedRoute>
@@ -74,7 +76,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 lg:pl-64">
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-white/95 backdrop-blur-sm px-6 shadow-sm">
-          <Sheet>
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-6 w-6" />
@@ -96,7 +98,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 {navigation.map((item) => {
                   const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                   return (
-                    <Link key={item.name} href={item.href}>
+                    <Link key={item.name} href={item.href} onClick={() => setMobileMenuOpen(false)}>
                       <Button
                         variant="ghost"
                         className={cn(

@@ -32,6 +32,8 @@ export default function QueriesPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuery, setSelectedQuery] = useState<ContactQuery | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchQueries();
@@ -39,6 +41,7 @@ export default function QueriesPage() {
 
   useEffect(() => {
     filterQueries();
+    setCurrentPage(1);
   }, [queries, searchTerm, typeFilter, statusFilter]);
 
   const fetchQueries = async () => {
@@ -121,7 +124,7 @@ export default function QueriesPage() {
       contact: 'bg-blue-100 text-blue-800',
       product: 'bg-green-100 text-green-800',
       support: 'bg-orange-100 text-orange-800',
-      sales: 'bg-purple-100 text-purple-800',
+      sales: 'bg-teal-100 text-teal-800',
       partnership: 'bg-pink-100 text-pink-800',
       general: 'bg-gray-100 text-gray-800',
     };
@@ -195,7 +198,7 @@ export default function QueriesPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredQueries.map((query) => (
+          filteredQueries.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((query) => (
             <Card
               key={query._id}
               className="cursor-pointer hover:shadow-lg transition-shadow"
@@ -234,6 +237,28 @@ export default function QueriesPage() {
           ))
         )}
       </div>
+
+      {filteredQueries.length > itemsPerPage && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600">
+            Page {currentPage} of {Math.ceil(filteredQueries.length / itemsPerPage)}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.min(Math.ceil(filteredQueries.length / itemsPerPage), prev + 1))}
+            disabled={currentPage === Math.ceil(filteredQueries.length / itemsPerPage)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       <Dialog open={!!selectedQuery} onOpenChange={() => setSelectedQuery(null)}>
         <DialogContent className="max-w-2xl">

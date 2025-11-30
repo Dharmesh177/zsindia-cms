@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { api, Product } from '@/lib/api';
 import { Package, QrCode, TrendingUp } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Package, QrCode, TrendingUp } from 'lucide-react';
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -30,18 +32,21 @@ export default function DashboardPage() {
       value: products.length,
       icon: Package,
       description: 'Active in catalog',
+      href: '/dashboard/products',
     },
     {
       title: 'Categories',
       value: Array.from(new Set(products.map((p) => p.category))).length,
       icon: TrendingUp,
       description: 'Product categories',
+      href: '/dashboard/products',
     },
     {
       title: 'QR Codes',
       value: products.length,
       icon: QrCode,
       description: 'Available to generate',
+      href: '/dashboard/verify-product',
     },
   ];
 
@@ -64,7 +69,11 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {stats.map((stat) => (
-          <Card key={stat.title} className="border-blue-200 hover:shadow-lg transition-shadow bg-gradient-to-br from-white to-blue-50">
+          <Card
+            key={stat.title}
+            className="border-blue-200 hover:shadow-lg transition-shadow bg-gradient-to-br from-white to-blue-50 cursor-pointer"
+            onClick={() => router.push(stat.href)}
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-blue-900">
                 {stat.title}

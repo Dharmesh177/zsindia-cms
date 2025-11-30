@@ -22,6 +22,7 @@ interface ProductFormProps {
 export function ProductForm({ product, mode }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState<ProductInput>({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -76,20 +77,23 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
     try {
       if (mode === 'create') {
-        await api.createProduct(formData);
+        await api.createProduct(formData, selectedFiles);
         toast.success('Product created successfully');
-      } else if (product?._id) {
-        await api.updateProduct(product._id, formData);
+      } else if (mode === 'edit' && product?._id) {
+        await api.updateProduct(product._id, formData, selectedFiles);
         toast.success('Product updated successfully');
       }
+
       router.push('/dashboard/products');
-    } catch (error) {
-      toast.error(`Failed to ${mode} product`);
+      router.refresh();
+    } catch (error: any) {
       console.error(`Failed to ${mode} product:`, error);
+      toast.error(error.message || `Failed to ${mode} product`);
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleInputChange = (field: string, value: string) => {
     if (field.includes('.')) {
@@ -213,10 +217,10 @@ export function ProductForm({ product, mode }: ProductFormProps) {
             </CardHeader>
             <CardContent>
               <ImageUpload
-                images={formData.images}
-                onChange={(images) => setFormData((prev) => ({ ...prev, images }))}
+                files={selectedFiles}
                 maxImages={5}
                 minImages={1}
+                onChange={(files: File[]) => setSelectedFiles(files)}
               />
             </CardContent>
           </Card>

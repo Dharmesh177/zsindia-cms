@@ -37,6 +37,8 @@ export default function TestimonialsPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -51,6 +53,7 @@ export default function TestimonialsPage() {
 
   useEffect(() => {
     filterTestimonials();
+    setCurrentPage(1);
   }, [testimonials, searchTerm]);
 
   const fetchTestimonials = async () => {
@@ -201,7 +204,7 @@ export default function TestimonialsPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredTestimonials.map((testimonial) => (
+          filteredTestimonials.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((testimonial) => (
             <Card
               key={testimonial._id}
               className={`hover:shadow-lg transition-shadow ${
@@ -263,6 +266,28 @@ export default function TestimonialsPage() {
           ))
         )}
       </div>
+
+      {filteredTestimonials.length > itemsPerPage && (
+        <div className="flex justify-center items-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600">
+            Page {currentPage} of {Math.ceil(filteredTestimonials.length / itemsPerPage)}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setCurrentPage((prev) => Math.min(Math.ceil(filteredTestimonials.length / itemsPerPage), prev + 1))}
+            disabled={currentPage === Math.ceil(filteredTestimonials.length / itemsPerPage)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>

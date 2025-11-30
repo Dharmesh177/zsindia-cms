@@ -11,8 +11,8 @@ export interface Product {
   family: string;
   category: string;
   technology: string;
-  thumbnail: string;
-  images: string[];
+  thumbnail: File | string;
+  images: File[];
   overview: string;
   keyHighlights: string[];
   features: string[];
@@ -63,16 +63,17 @@ export const api = {
     const response = await fetch(`${API_URL}/products`, {
       method: 'GET',
       headers: {
-        'token':`${token}`,
+        token,
         'Cache-Control': 'no-cache',
       },
     });
+
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
 
     const data = await response.json();
-    return data.products; // Explicitly return the products array
+    return data.products;
   },
 
   async getProduct(id: string): Promise<Product> {
@@ -93,84 +94,176 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'GET',
       headers: {
-        'token':`${token}`,
+        token,
       },
     });
+
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
+
     return response.json();
   },
 
-  async createProduct(product: ProductInput): Promise<Product> {
+  // ✅ CREATE PRODUCT WITH FILES
+  async createProduct(input: ProductInput, files: File[]) {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
     }
 
-    if (USE_DUMMY_DATA) {
-      await delay(400);
-      const newProduct: Product = {
-        ...product,
-        _id: String(nextId++),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      localProducts = [...localProducts, newProduct];
-      return { ...newProduct };
-    }
+    const form = new FormData();
 
-    const response = await fetch(`${API_URL}/products`, {
+    // --- Basic text fields (coerce undefined -> "") ---
+    form.append('name', input.name);
+    form.append('family', input.family ?? '');
+    form.append('category', input.category ?? '');
+    form.append('technology', input.technology ?? '');
+    form.append('overview', input.overview ?? '');
+    form.append('warranty', input.warranty ?? '');
+
+    // --- Array fields (Multer/Express will treat multiple same-name fields as array) ---
+    (input.keyHighlights || []).forEach(v => form.append('keyHighlights', v));
+    (input.features || []).forEach(v => form.append('features', v));
+    (input.applications || []).forEach(v => form.append('applications', v));
+    (input.idealFor || []).forEach(v => form.append('idealFor', v));
+    (input.tags || []).forEach(v => form.append('tags', v));
+
+    // (Optional) Specs if needed later:
+    if (input.specifications?.powerOutput)
+      form.append('specifications.powerOutput', input.specifications.powerOutput);
+    if (input.specifications?.channels)
+      form.append('specifications.channels', input.specifications.channels);
+    if (input.specifications?.inputChannels)
+      form.append('specifications.inputChannels', input.specifications.inputChannels);
+    if (input.specifications?.digitalPlayer)
+      form.append('specifications.digitalPlayer', input.specifications.digitalPlayer);
+    if (input.specifications?.toneControl?.bass)
+      form.append('specifications.toneControl.bass', input.specifications.toneControl.bass);
+    if (input.specifications?.toneControl?.mid)
+      form.append('specifications.toneControl.mid', input.specifications.toneControl.mid);
+    if (input.specifications?.toneControl?.treble)
+      form.append('specifications.toneControl.treble', input.specifications.toneControl.treble);
+    if (input.specifications?.speakerOutput)
+      form.append('specifications.speakerOutput', input.specifications.speakerOutput);
+    if (input.specifications?.frequencyResponse)
+      form.append('specifications.frequencyResponse', input.specifications.frequencyResponse);
+    if (input.specifications?.snRatio)
+      form.append('specifications.snRatio', input.specifications.snRatio);
+    if (input.specifications?.powerSupply)
+      form.append('specifications.powerSupply', input.specifications.powerSupply);
+    if (input.specifications?.dimensions)
+      form.append('specifications.dimensions', input.specifications.dimensions);
+    if (input.specifications?.weight)
+      form.append('specifications.weight', input.specifications.weight);
+
+    // --- Files for Multer (must match: thumbnail, images) ---
+    if (files[0]) {
+      form.append('thumbnail', files[0]);
+    }
+    files.forEach(f => form.append('images', f));
+
+    const res = await fetch(`${API_URL}/products`, {
       method: 'POST',
       headers: {
-        'token':`${token}`,
-        'Content-Type': 'application/json',
+        token,
+        // ❌ DO NOT set 'Content-Type' here — browser sets multipart boundary
       },
-      body: JSON.stringify(product),
+      body: form,
     });
-    if (!response.ok) {
-      throw new Error('Failed to create product');
+
+    let data: any;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Failed to parse server response');
     }
-    return response.json();
+
+    if (!res.ok || data.status !== 'success') {
+      throw new Error(data.message || 'Product creation failed');
+    }
+
+    return data.product as Product;
   },
 
-  async updateProduct(id: string, product: Partial<ProductInput>): Promise<Product> {
+  // ✅ UPDATE PRODUCT WITH FILES
+  async updateProduct(id: string, input: ProductInput, files: File[]) {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
     }
 
-    if (USE_DUMMY_DATA) {
-      await delay(400);
-      const index = localProducts.findIndex(p => p._id === id);
-      if (index === -1) {
-        throw new Error('Product not found');
-      }
-      const updatedProduct: Product = {
-        ...localProducts[index],
-        ...product,
-        updatedAt: new Date().toISOString(),
-      };
-      localProducts = [
-        ...localProducts.slice(0, index),
-        updatedProduct,
-        ...localProducts.slice(index + 1),
-      ];
-      return { ...updatedProduct };
+    const form = new FormData();
+
+    // --- Basic text fields ---
+    form.append('name', input.name);
+    form.append('family', input.family ?? '');
+    form.append('category', input.category ?? '');
+    form.append('technology', input.technology ?? '');
+    form.append('overview', input.overview ?? '');
+    form.append('warranty', input.warranty ?? '');
+
+    // --- Array fields ---
+    (input.keyHighlights || []).forEach(v => form.append('keyHighlights', v));
+    (input.features || []).forEach(v => form.append('features', v));
+    (input.applications || []).forEach(v => form.append('applications', v));
+    (input.idealFor || []).forEach(v => form.append('idealFor', v));
+    (input.tags || []).forEach(v => form.append('tags', v));
+
+    // --- Specs (same as in create) ---
+    if (input.specifications?.powerOutput)
+      form.append('specifications.powerOutput', input.specifications.powerOutput);
+    if (input.specifications?.channels)
+      form.append('specifications.channels', input.specifications.channels);
+    if (input.specifications?.inputChannels)
+      form.append('specifications.inputChannels', input.specifications.inputChannels);
+    if (input.specifications?.digitalPlayer)
+      form.append('specifications.digitalPlayer', input.specifications.digitalPlayer);
+    if (input.specifications?.toneControl?.bass)
+      form.append('specifications.toneControl.bass', input.specifications.toneControl.bass);
+    if (input.specifications?.toneControl?.mid)
+      form.append('specifications.toneControl.mid', input.specifications.toneControl.mid);
+    if (input.specifications?.toneControl?.treble)
+      form.append('specifications.toneControl.treble', input.specifications.toneControl.treble);
+    if (input.specifications?.speakerOutput)
+      form.append('specifications.speakerOutput', input.specifications.speakerOutput);
+    if (input.specifications?.frequencyResponse)
+      form.append('specifications.frequencyResponse', input.specifications.frequencyResponse);
+    if (input.specifications?.snRatio)
+      form.append('specifications.snRatio', input.specifications.snRatio);
+    if (input.specifications?.powerSupply)
+      form.append('specifications.powerSupply', input.specifications.powerSupply);
+    if (input.specifications?.dimensions)
+      form.append('specifications.dimensions', input.specifications.dimensions);
+    if (input.specifications?.weight)
+      form.append('specifications.weight', input.specifications.weight);
+
+    // --- Files (only send if user picked new ones) ---
+    if (files[0]) {
+      form.append('thumbnail', files[0]);
+      files.forEach(f => form.append('images', f));
     }
 
-    const response = await fetch(`${API_URL}/products/${id}`, {
-      method: 'PUT',
+    const res = await fetch(`${API_URL}/products/${id}`, {
+      method: 'PUT', // or 'PATCH' depending on your backend
       headers: {
-        'token':`${token}`,
-        'Content-Type': 'application/json',
+        token,
       },
-      body: JSON.stringify(product),
+      body: form,
     });
-    if (!response.ok) {
-      throw new Error('Failed to update product');
+
+    let data: any;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Failed to parse server response');
     }
-    return response.json();
+
+    if (!res.ok || data.status !== 'success') {
+      throw new Error(data.message || 'Product update failed');
+    }
+
+    return data.product as Product;
   },
 
   async deleteProduct(id: string): Promise<void> {
@@ -188,10 +281,11 @@ export const api = {
     const response = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
       headers: {
-        'token':`${token}`,
+        token,
         'Content-Type': 'application/json',
       },
     });
+
     if (!response.ok) {
       throw new Error('Failed to delete product');
     }
