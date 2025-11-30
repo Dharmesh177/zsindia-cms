@@ -2,32 +2,43 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { api, Product } from '@/lib/api';
+import { api, Product, SerialNumber } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, Shield } from 'lucide-react';
 
 export default function VerifyPage() {
   const params = useParams();
   const [product, setProduct] = useState<Product | null>(null);
+  const [serialData, setSerialData] = useState<SerialNumber | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const verifyProduct = async () => {
       try {
-        const data = await api.getProduct(params.id as string);
-        setProduct(data);
+        const serialNumber = params.id as string;
+        const result = await api.verifySerialNumber(serialNumber);
+
+        if (result.valid && result.product) {
+          setProduct(result.product);
+          setSerialData(result.serialData || null);
+        } else {
+          setError(true);
+          setErrorMessage('Invalid or deactivated serial number');
+        }
       } catch (error) {
-        console.error('Failed to fetch product:', error);
+        console.error('Failed to verify:', error);
         setError(true);
+        setErrorMessage('Product verification failed');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    verifyProduct();
   }, [params.id]);
 
   if (loading) {
@@ -45,15 +56,25 @@ export default function VerifyPage() {
   if (error || !product) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-        <Card className="w-full max-w-2xl">
+        <Card className="w-full max-w-2xl border-2 border-red-500">
           <CardContent className="py-12 text-center space-y-4">
             <div className="flex justify-center">
               <XCircle className="h-16 w-16 text-red-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Product Not Found</h1>
-            <p className="text-gray-600">
-              This product could not be verified. Please check the QR code or contact support.
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900">Verification Failed</h1>
+            <p className="text-gray-600">{errorMessage}</p>
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <div className="text-left text-sm text-yellow-800">
+                  <p className="font-semibold mb-1">Warning</p>
+                  <p>
+                    This serial number could not be verified. This product may be counterfeit.
+                    Please contact ZSIndia support immediately if you purchased this product.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -72,6 +93,27 @@ export default function VerifyPage() {
             <p className="text-gray-600">
               This is a genuine ZSIndia product. See details below.
             </p>
+            {serialData && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
+                <div className="flex items-center justify-center gap-2 text-sm text-green-800">
+                  <Shield className="h-4 w-4" />
+                  <div>
+                    <span className="font-semibold">Serial Number: </span>
+                    <span className="font-mono">{serialData.serialNumber}</span>
+                    {serialData.verifiedCount > 0 && (
+                      <span className="ml-2 text-xs">
+                        (Verified {serialData.verifiedCount} time{serialData.verifiedCount > 1 ? 's' : ''})
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {serialData.batchNumber && (
+                  <p className="text-xs text-green-700 mt-2">
+                    Batch: {serialData.batchNumber}
+                  </p>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Edit, Trash2, ArrowLeft } from 'lucide-react';
+import { Edit, Trash2, ArrowLeft, QrCode } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,6 +90,12 @@ export default function ViewProductPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          <Link href={`/dashboard/products/${product._id}/serial-numbers`}>
+            <Button variant="outline">
+              <QrCode className="mr-2 h-4 w-4" />
+              QR Codes
+            </Button>
+          </Link>
           <Link href={`/dashboard/products/${product._id}/edit`}>
             <Button>
               <Edit className="mr-2 h-4 w-4" />

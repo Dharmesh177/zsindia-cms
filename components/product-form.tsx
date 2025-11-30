@@ -23,6 +23,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>(product?.images || []);
   const [formData, setFormData] = useState<ProductInput>({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -66,10 +67,14 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   });
 
   useEffect(() => {
-    if (formData.images.length > 0 && formData.images[0] !== formData.thumbnail) {
-      setFormData((prev) => ({ ...prev, thumbnail: formData.images[0] }));
+    if (product?.images) {
+      setExistingImages(product.images);
     }
-  }, [formData.images]);
+  }, [product]);
+
+  const handleRemoveExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +85,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
         await api.createProduct(formData, selectedFiles);
         toast.success('Product created successfully');
       } else if (mode === 'edit' && product?._id) {
-        await api.updateProduct(product._id, formData, selectedFiles);
+        const updatedFormData = { ...formData, images: existingImages };
+        await api.updateProduct(product._id, updatedFormData, selectedFiles);
         toast.success('Product updated successfully');
       }
 
@@ -218,6 +224,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
             <CardContent>
               <ImageUpload
                 files={selectedFiles}
+                existingImages={existingImages}
+                onRemoveExisting={handleRemoveExistingImage}
                 maxImages={5}
                 minImages={1}
                 onChange={(files: File[]) => setSelectedFiles(files)}

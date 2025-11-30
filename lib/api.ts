@@ -4,6 +4,18 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://zoom-sounds-backend.
 
 const USE_DUMMY_DATA = false;
 
+export interface SerialNumber {
+  _id: string;
+  serialNumber: string;
+  productId: string;
+  isVerified: boolean;
+  verifiedAt?: string;
+  verifiedCount: number;
+  status: 'active' | 'deactivated';
+  createdAt: string;
+  batchNumber?: string;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -11,8 +23,8 @@ export interface Product {
   family: string;
   category: string;
   technology: string;
-  thumbnail: File | string;
-  images: File[];
+  thumbnail: string;
+  images: string[];
   overview: string;
   keyHighlights: string[];
   features: string[];
@@ -37,6 +49,7 @@ export interface Product {
     weight?: string;
   };
   warranty?: string;
+  totalSerialNumbers?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -102,7 +115,8 @@ export const api = {
       throw new Error('Failed to fetch product');
     }
 
-    return response.json();
+    const data = await response.json();
+    return data.product || data;
   },
 
   // ✅ CREATE PRODUCT WITH FILES
@@ -116,6 +130,7 @@ export const api = {
 
     // --- Basic text fields (coerce undefined -> "") ---
     form.append('name', input.name);
+    form.append('slug', input.slug);
     form.append('family', input.family ?? '');
     form.append('category', input.category ?? '');
     form.append('technology', input.technology ?? '');
@@ -123,43 +138,43 @@ export const api = {
     form.append('warranty', input.warranty ?? '');
 
     // --- Array fields (Multer/Express will treat multiple same-name fields as array) ---
-    (input.keyHighlights || []).forEach(v => form.append('keyHighlights', v));
-    (input.features || []).forEach(v => form.append('features', v));
-    (input.applications || []).forEach(v => form.append('applications', v));
-    (input.idealFor || []).forEach(v => form.append('idealFor', v));
-    (input.tags || []).forEach(v => form.append('tags', v));
+    (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));
+    (input.features || []).forEach(v => form.append('features[]', v));
+    (input.applications || []).forEach(v => form.append('applications[]', v));
+    (input.idealFor || []).forEach(v => form.append('idealFor[]', v));
+    (input.tags || []).forEach(v => form.append('tags[]', v));
 
-    // (Optional) Specs if needed later:
+    // --- Specifications as nested fields (Express will parse as object) ---
     if (input.specifications?.powerOutput)
-      form.append('specifications.powerOutput', input.specifications.powerOutput);
+      form.append('specifications[powerOutput]', input.specifications.powerOutput);
     if (input.specifications?.channels)
-      form.append('specifications.channels', input.specifications.channels);
+      form.append('specifications[channels]', input.specifications.channels);
     if (input.specifications?.inputChannels)
-      form.append('specifications.inputChannels', input.specifications.inputChannels);
+      form.append('specifications[inputChannels]', input.specifications.inputChannels);
     if (input.specifications?.digitalPlayer)
-      form.append('specifications.digitalPlayer', input.specifications.digitalPlayer);
+      form.append('specifications[digitalPlayer]', input.specifications.digitalPlayer);
     if (input.specifications?.toneControl?.bass)
-      form.append('specifications.toneControl.bass', input.specifications.toneControl.bass);
+      form.append('specifications[toneControl][bass]', input.specifications.toneControl.bass);
     if (input.specifications?.toneControl?.mid)
-      form.append('specifications.toneControl.mid', input.specifications.toneControl.mid);
+      form.append('specifications[toneControl][mid]', input.specifications.toneControl.mid);
     if (input.specifications?.toneControl?.treble)
-      form.append('specifications.toneControl.treble', input.specifications.toneControl.treble);
+      form.append('specifications[toneControl][treble]', input.specifications.toneControl.treble);
     if (input.specifications?.speakerOutput)
-      form.append('specifications.speakerOutput', input.specifications.speakerOutput);
+      form.append('specifications[speakerOutput]', input.specifications.speakerOutput);
     if (input.specifications?.frequencyResponse)
-      form.append('specifications.frequencyResponse', input.specifications.frequencyResponse);
+      form.append('specifications[frequencyResponse]', input.specifications.frequencyResponse);
     if (input.specifications?.snRatio)
-      form.append('specifications.snRatio', input.specifications.snRatio);
+      form.append('specifications[snRatio]', input.specifications.snRatio);
     if (input.specifications?.powerSupply)
-      form.append('specifications.powerSupply', input.specifications.powerSupply);
+      form.append('specifications[powerSupply]', input.specifications.powerSupply);
     if (input.specifications?.dimensions)
-      form.append('specifications.dimensions', input.specifications.dimensions);
+      form.append('specifications[dimensions]', input.specifications.dimensions);
     if (input.specifications?.weight)
-      form.append('specifications.weight', input.specifications.weight);
+      form.append('specifications[weight]', input.specifications.weight);
 
-    // --- Files for Multer (must match: thumbnail, images) ---
+    // --- Files for Multer (must match backend: imgCover, images) ---
     if (files[0]) {
-      form.append('thumbnail', files[0]);
+      form.append('imgCover', files[0]);
     }
     files.forEach(f => form.append('images', f));
 
@@ -197,6 +212,7 @@ export const api = {
 
     // --- Basic text fields ---
     form.append('name', input.name);
+    form.append('slug', input.slug);
     form.append('family', input.family ?? '');
     form.append('category', input.category ?? '');
     form.append('technology', input.technology ?? '');
@@ -204,43 +220,43 @@ export const api = {
     form.append('warranty', input.warranty ?? '');
 
     // --- Array fields ---
-    (input.keyHighlights || []).forEach(v => form.append('keyHighlights', v));
-    (input.features || []).forEach(v => form.append('features', v));
-    (input.applications || []).forEach(v => form.append('applications', v));
-    (input.idealFor || []).forEach(v => form.append('idealFor', v));
-    (input.tags || []).forEach(v => form.append('tags', v));
+    (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));
+    (input.features || []).forEach(v => form.append('features[]', v));
+    (input.applications || []).forEach(v => form.append('applications[]', v));
+    (input.idealFor || []).forEach(v => form.append('idealFor[]', v));
+    (input.tags || []).forEach(v => form.append('tags[]', v));
 
-    // --- Specs (same as in create) ---
+    // --- Specifications as nested fields (Express will parse as object) ---
     if (input.specifications?.powerOutput)
-      form.append('specifications.powerOutput', input.specifications.powerOutput);
+      form.append('specifications[powerOutput]', input.specifications.powerOutput);
     if (input.specifications?.channels)
-      form.append('specifications.channels', input.specifications.channels);
+      form.append('specifications[channels]', input.specifications.channels);
     if (input.specifications?.inputChannels)
-      form.append('specifications.inputChannels', input.specifications.inputChannels);
+      form.append('specifications[inputChannels]', input.specifications.inputChannels);
     if (input.specifications?.digitalPlayer)
-      form.append('specifications.digitalPlayer', input.specifications.digitalPlayer);
+      form.append('specifications[digitalPlayer]', input.specifications.digitalPlayer);
     if (input.specifications?.toneControl?.bass)
-      form.append('specifications.toneControl.bass', input.specifications.toneControl.bass);
+      form.append('specifications[toneControl][bass]', input.specifications.toneControl.bass);
     if (input.specifications?.toneControl?.mid)
-      form.append('specifications.toneControl.mid', input.specifications.toneControl.mid);
+      form.append('specifications[toneControl][mid]', input.specifications.toneControl.mid);
     if (input.specifications?.toneControl?.treble)
-      form.append('specifications.toneControl.treble', input.specifications.toneControl.treble);
+      form.append('specifications[toneControl][treble]', input.specifications.toneControl.treble);
     if (input.specifications?.speakerOutput)
-      form.append('specifications.speakerOutput', input.specifications.speakerOutput);
+      form.append('specifications[speakerOutput]', input.specifications.speakerOutput);
     if (input.specifications?.frequencyResponse)
-      form.append('specifications.frequencyResponse', input.specifications.frequencyResponse);
+      form.append('specifications[frequencyResponse]', input.specifications.frequencyResponse);
     if (input.specifications?.snRatio)
-      form.append('specifications.snRatio', input.specifications.snRatio);
+      form.append('specifications[snRatio]', input.specifications.snRatio);
     if (input.specifications?.powerSupply)
-      form.append('specifications.powerSupply', input.specifications.powerSupply);
+      form.append('specifications[powerSupply]', input.specifications.powerSupply);
     if (input.specifications?.dimensions)
-      form.append('specifications.dimensions', input.specifications.dimensions);
+      form.append('specifications[dimensions]', input.specifications.dimensions);
     if (input.specifications?.weight)
-      form.append('specifications.weight', input.specifications.weight);
+      form.append('specifications[weight]', input.specifications.weight);
 
     // --- Files (only send if user picked new ones) ---
     if (files[0]) {
-      form.append('thumbnail', files[0]);
+      form.append('imgCover', files[0]);
       files.forEach(f => form.append('images', f));
     }
 
@@ -289,5 +305,81 @@ export const api = {
     if (!response.ok) {
       throw new Error('Failed to delete product');
     }
+  },
+
+  async generateSerialNumbers(productId: string, quantity: number, batchNumber?: string): Promise<SerialNumber[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
+    const response = await fetch(`${API_URL}/serial-numbers/generate`, {
+      method: 'POST',
+      headers: {
+        token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, quantity, batchNumber }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate serial numbers');
+    }
+
+    const data = await response.json();
+    return data.serialNumbers;
+  },
+
+  async getProductSerialNumbers(productId: string): Promise<SerialNumber[]> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
+    const response = await fetch(`${API_URL}/serial-numbers/product/${productId}`, {
+      method: 'GET',
+      headers: {
+        token,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch serial numbers');
+    }
+
+    const data = await response.json();
+    return data.serialNumbers || [];
+  },
+
+  async deactivateSerialNumber(serialNumberId: string): Promise<void> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token was not provided!');
+    }
+
+    const response = await fetch(`${API_URL}/serial-numbers/${serialNumberId}/deactivate`, {
+      method: 'PATCH',
+      headers: {
+        token,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to deactivate serial number');
+    }
+  },
+
+  async verifySerialNumber(serialNumber: string): Promise<{ valid: boolean; product?: Product; serialData?: SerialNumber }> {
+    const response = await fetch(`${API_URL}/serial-numbers/verify/${serialNumber}`, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to verify serial number');
+    }
+
+    const data = await response.json();
+    return data;
   },
 };
