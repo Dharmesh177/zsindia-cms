@@ -13,7 +13,6 @@ import { ProtectedRoute } from './protected-route';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/dashboard/products', icon: Package },
-  { name: 'Generate QR', href: '/dashboard/verify-product', icon: QrCode },
   { name: 'Contact Queries', href: '/dashboard/queries', icon: MessageSquare },
   { name: 'Testimonials', href: '/dashboard/testimonials', icon: Star },
 ];

@@ -43,7 +43,7 @@ export default function DashboardPage() {
     },
     {
       title: 'QR Codes',
-      value: products.length,
+      value: 456,
       icon: QrCode,
       description: 'Available to generate',
       href: '/dashboard/verify-product',
