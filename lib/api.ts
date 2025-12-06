@@ -405,44 +405,6 @@ export const api = {
   },
 
   async verifySerialNumber(serialNumber: string): Promise<{ valid: boolean; product?: Product; serialData?: SerialNumber }> {
-    // TEMPORARY: Using dummy data until backend is updated
-    // if (USE_DUMMY_SERIAL_DATA) {
-    //   await delay(500);
-    //   const serial = localSerialNumbers.find(s => s.serialNumber === serialNumber);
-
-    //   if (!serial || serial.status === 'deactivated') {
-    //     return { valid: false };
-    //   }
-
-    //   // Update verification count
-    //   const index = localSerialNumbers.findIndex(s => s.serialNumber === serialNumber);
-    //   if (index !== -1) {
-    //     localSerialNumbers[index].verifiedCount += 1;
-    //     if (!localSerialNumbers[index].isVerified) {
-    //       localSerialNumbers[index].isVerified = true;
-    //       localSerialNumbers[index].verifiedAt = new Date().toISOString();
-    //     }
-    //   }
-
-    //   // Get product (from dummy or real data)
-    //   let product: Product | undefined;
-    //   try {
-    //     if (USE_DUMMY_DATA) {
-    //       product = localProducts.find(p => p._id === serial.productId);
-    //     } else {
-    //       product = await this.getProduct(serial.productId);
-    //     }
-    //   } catch (error) {
-    //     console.error('Error fetching product:', error);
-    //   }
-
-    //   return {
-    //     valid: true,
-    //     product,
-    //     serialData: serial,
-    //   };
-    // }
-
     // COMMENTED OUT: Uncomment when backend is ready
     const response = await fetch(`${API_URL}/serial-numbers/verify/${serialNumber}`, {
       method: 'GET',

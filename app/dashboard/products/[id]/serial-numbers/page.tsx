@@ -43,7 +43,7 @@ export default function SerialNumbersPage() {
   const [batchNumber, setBatchNumber] = useState('');
 
   // Get the base URL for QR codes
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const baseUrl = 'https://zsindia.com';
 
   useEffect(() => {
     fetchData();
