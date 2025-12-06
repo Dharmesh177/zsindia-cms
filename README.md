@@ -160,7 +160,7 @@ const USE_DUMMY_DATA = false;
 
 3. Ensure your backend is running at:
 ```
-https://zoom-sounds-backend.onrender.com/api/v1
+https://api.zsindia.com/api/v1
 ```
 
 See [API-SETUP.md](./API-SETUP.md) for more details.
@@ -217,7 +217,7 @@ The application will run on port 3000.
 
 ```bash
 # API Configuration (Optional - uses dummy data by default)
-NEXT_PUBLIC_API_URL=https://zoom-sounds-backend.onrender.com/api/v1
+NEXT_PUBLIC_API_URL=https://api.zsindia.com/api/v1
 ```
 
 ## 📱 Features Overview

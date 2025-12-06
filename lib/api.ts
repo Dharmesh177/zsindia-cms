@@ -1,7 +1,7 @@
 import { dummyProducts } from './dummy-data';
 import { dummySerialNumbers, generateDummySerialNumbers } from './dummy-serial-numbers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://zoom-sounds-backend.onrender.com/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.zsindia.com/api/v1';
 
 const USE_DUMMY_DATA = false;
 

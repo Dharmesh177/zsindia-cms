@@ -31,7 +31,7 @@ const USE_DUMMY_DATA = false;
 
 3. Ensure your backend is running at:
 ```
-https://zoom-sounds-backend.onrender.com/api/v1
+https://api.zsindia.com/api/v1
 ```
 
 4. The application will now make real HTTP requests:
