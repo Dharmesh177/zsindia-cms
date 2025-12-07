@@ -24,6 +24,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
   const [loading, setLoading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<string[]>(product?.images || []);
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [existingThumbnail, setExistingThumbnail] = useState<string>(product?.thumbnail || '');
   const [formData, setFormData] = useState<ProductInput>({
     name: product?.name || '',
     slug: product?.slug || '',
@@ -71,6 +73,9 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     if (product?.images) {
       setExistingImages(product.images);
     }
+    if (product?.thumbnail) {
+      setExistingThumbnail(product.thumbnail);
+    }
   }, [product]);
 
   const handleRemoveExistingImage = (index: number) => {
@@ -83,11 +88,11 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
     try {
       if (mode === 'create') {
-        await api.createProduct(formData, selectedFiles);
+        await api.createProduct(formData, selectedFiles, thumbnailFile);
         toast.success('Product created successfully');
       } else if (mode === 'edit' && product?._id) {
-        const updatedFormData = { ...formData, images: existingImages };
-        await api.updateProduct(product._id, updatedFormData, selectedFiles);
+        const updatedFormData = { ...formData, images: existingImages, thumbnail: existingThumbnail };
+        await api.updateProduct(product._id, updatedFormData, selectedFiles, thumbnailFile);
         toast.success('Product updated successfully');
       }
 
@@ -241,6 +246,22 @@ export function ProductForm({ product, mode }: ProductFormProps) {
         </TabsContent>
 
         <TabsContent value="images" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Product Thumbnail *</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ImageUpload
+                files={thumbnailFile ? [thumbnailFile] : []}
+                existingImages={existingThumbnail ? [existingThumbnail] : []}
+                onRemoveExisting={() => setExistingThumbnail('')}
+                maxImages={1}
+                minImages={1}
+                onChange={(files: File[]) => setThumbnailFile(files[0] || null)}
+              />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Product Images</CardTitle>

@@ -128,7 +128,7 @@ export const api = {
   },
 
   // ✅ CREATE PRODUCT WITH FILES
-  async createProduct(input: ProductInput, files: File[]) {
+  async createProduct(input: ProductInput, files: File[], thumbnailFile?: File | null) {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -181,10 +181,15 @@ export const api = {
     if (input.specifications?.weight)
       form.append('specifications[weight]', input.specifications.weight);
 
+    // --- Thumbnail file ---
+    if (thumbnailFile) {
+      form.append('thumbnail', thumbnailFile);
+    }
+
     // --- Files for Multer (must match backend: imgCover, images) ---
-    // if (files[0]) {
-    //   form.append('imgCover', files[0]);
-    // }
+    if (files[0]) {
+      form.append('imgCover', files[0]);
+    }
     files.forEach(f => form.append('images', f));
 
     const res = await fetch(`${API_URL}/products`, {
@@ -211,7 +216,7 @@ export const api = {
   },
 
   // ✅ UPDATE PRODUCT WITH FILES
-  async updateProduct(id: string, input: ProductInput, files: File[]) {
+  async updateProduct(id: string, input: ProductInput, files: File[], thumbnailFile?: File | null) {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -263,6 +268,11 @@ export const api = {
       form.append('specifications[dimensions]', input.specifications.dimensions);
     if (input.specifications?.weight)
       form.append('specifications[weight]', input.specifications.weight);
+
+    // --- Thumbnail file ---
+    if (thumbnailFile) {
+      form.append('thumbnail', thumbnailFile);
+    }
 
     // --- Files (only send if user picked new ones) ---
     if (files[0]) {
