@@ -56,6 +56,7 @@ export interface Product {
     weight?: string;
   };
   warranty?: string;
+  isTopSellingProduct?: boolean;
   totalSerialNumbers?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -143,6 +144,7 @@ export const api = {
     form.append('technology', input.technology ?? '');
     form.append('overview', input.overview ?? '');
     form.append('warranty', input.warranty ?? '');
+    form.append('isTopSellingProduct', input.isTopSellingProduct ? 'true' : 'false');
 
     // --- Array fields (Multer/Express will treat multiple same-name fields as array) ---
     (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));
@@ -225,6 +227,7 @@ export const api = {
     form.append('technology', input.technology ?? '');
     form.append('overview', input.overview ?? '');
     form.append('warranty', input.warranty ?? '');
+    form.append('isTopSellingProduct', input.isTopSellingProduct ? 'true' : 'false');
 
     // --- Array fields ---
     (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));

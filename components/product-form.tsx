@@ -56,6 +56,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
       weight: product?.specifications?.weight || '',
     },
     warranty: product?.warranty || '',
+    isTopSellingProduct: product?.isTopSellingProduct || false,
   });
 
   const [arrayInputs, setArrayInputs] = useState({
@@ -147,6 +148,13 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     }));
   };
 
+  const handleCheckboxChange = (field: string, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: checked,
+    }));
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Tabs defaultValue="basic" className="w-full">
@@ -209,6 +217,22 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                     value={formData.technology}
                     onChange={(e) => handleInputChange('technology', e.target.value)}
                   />
+                </div>
+                <div className="space-y-2 flex items-center">
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="isTopSellingProduct"
+                      type="checkbox"
+                      checked={!!formData.isTopSellingProduct}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, isTopSellingProduct: e.target.checked }))
+                      }
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="isTopSellingProduct" className="mb-0">
+                      Featured / Top Selling
+                    </Label>
+                  </div>
                 </div>
               </div>
 
