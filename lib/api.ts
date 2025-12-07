@@ -182,9 +182,9 @@ export const api = {
       form.append('specifications[weight]', input.specifications.weight);
 
     // --- Files for Multer (must match backend: imgCover, images) ---
-    if (files[0]) {
-      form.append('imgCover', files[0]);
-    }
+    // if (files[0]) {
+    //   form.append('imgCover', files[0]);
+    // }
     files.forEach(f => form.append('images', f));
 
     const res = await fetch(`${API_URL}/products`, {
