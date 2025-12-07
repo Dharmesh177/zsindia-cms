@@ -248,7 +248,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
         <TabsContent value="images" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Product Thumbnail *</CardTitle>
+              <CardTitle>Product Thumbnail</CardTitle>
             </CardHeader>
             <CardContent>
               <ImageUpload
@@ -256,7 +256,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                 existingImages={existingThumbnail ? [existingThumbnail] : []}
                 onRemoveExisting={() => setExistingThumbnail('')}
                 maxImages={1}
-                minImages={1}
+                minImages={0}
                 onChange={(files: File[]) => setThumbnailFile(files[0] || null)}
               />
             </CardContent>
