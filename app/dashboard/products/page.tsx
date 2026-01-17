@@ -45,7 +45,6 @@ import { toast } from 'sonner';
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -59,10 +58,14 @@ export default function ProductsPage() {
     fetchProducts();
   }, [currentPage]); // Refetch products when the page changes
 
+  // Reset to page 1 when search or filter changes
   useEffect(() => {
-    filterProducts();
-    setCurrentPage(1);
-  }, [searchTerm, categoryFilter, products]);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchProducts(); // If already on page 1, just refetch
+    }
+  }, [searchTerm, categoryFilter]);
 
   const fetchProducts = async () => {
     try {
@@ -72,7 +75,6 @@ export default function ProductsPage() {
         itemsPerPage
       ); // Use pagination parameters
       setProducts(products);
-      setFilteredProducts(products);
       setTotalPages(totalPages); // Update total pages dynamically
       setTotalProducts(totalProducts); // Optionally track total products
     } catch (error) {
@@ -81,25 +83,6 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterProducts = () => {
-    let filtered = [...products];
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.family.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter((product) => product.category === categoryFilter);
-    }
-
-    setFilteredProducts(filtered);
   };
 
   const handleDelete = async () => {
@@ -118,10 +101,6 @@ export default function ProductsPage() {
   };
 
   const categories = ['all', ...Array.from(new Set(products.map((p) => p.category)))];
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
 
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
@@ -215,14 +194,14 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.length === 0 ? (
+            {products.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-gray-500">
                   No products found
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedProducts.map((product) => (
+              products.map((product) => (
                 <TableRow key={product._id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
@@ -261,8 +240,7 @@ export default function ProductsPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-600">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredProducts.length)} of{' '}
-            {filteredProducts.length} products
+            Page {currentPage} of {totalPages} ({totalProducts} total products)
           </p>
           <Pagination>
             <PaginationContent>
