@@ -14,8 +14,8 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await api.getProducts();
-        setProducts(data);
+        const {products} = await api.getProducts();
+        setProducts(products);
       } catch (error) {
         console.error('Failed to fetch products:', error);
       } finally {

@@ -24,8 +24,8 @@ export default function VerifyProductPage() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await api.getProducts();
-        setProducts(data);
+        const {products} = await api.getProducts();
+        setProducts(products);
       } catch (error) {
         toast.error('Failed to fetch products');
         console.error('Failed to fetch products:', error);
