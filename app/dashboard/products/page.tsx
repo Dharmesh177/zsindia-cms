@@ -52,10 +52,12 @@ export default function ProductsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [currentPage]); // Refetch products when the page changes
 
   useEffect(() => {
     filterProducts();
@@ -65,10 +67,14 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const response = await api.getProducts();
-      const data = response; // Extract the products array
-      setProducts(data);
-      setFilteredProducts(data);
+      const { products, totalPages, totalProducts } = await api.getProducts(
+        currentPage,
+        itemsPerPage
+      ); // Use pagination parameters
+      setProducts(products);
+      setFilteredProducts(products);
+      setTotalPages(totalPages); // Update total pages dynamically
+      setTotalProducts(totalProducts); // Optionally track total products
     } catch (error) {
       toast.error('Failed to fetch products');
       console.error('Failed to fetch products:', error);
@@ -113,7 +119,6 @@ export default function ProductsPage() {
 
   const categories = ['all', ...Array.from(new Set(products.map((p) => p.category)))];
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedProducts = filteredProducts.slice(startIndex, endIndex);

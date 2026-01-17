@@ -70,7 +70,7 @@ let nextId = 7;
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const api = {
-  async getProducts(): Promise<Product[]> {
+  async getProducts(page: number = 1, limit: number = 10): Promise<{ products: Product[]; totalPages: number; totalProducts: number }> {
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Token was not provided!');
@@ -78,10 +78,16 @@ export const api = {
 
     if (USE_DUMMY_DATA) {
       await delay(300);
-      return [...localProducts];
+      const startIndex = (page - 1) * limit;
+      const paginatedProducts = localProducts.slice(startIndex, startIndex + limit);
+      return {
+        products: paginatedProducts,
+        totalPages: Math.ceil(localProducts.length / limit),
+        totalProducts: localProducts.length,
+      };
     }
 
-    const response = await fetch(`${API_URL}/products`, {
+    const response = await fetch(`${API_URL}/products?page=${page}&limit=${limit}`, {
       method: 'GET',
       headers: {
         token,
@@ -94,7 +100,11 @@ export const api = {
     }
 
     const data = await response.json();
-    return data.products;
+    return {
+      products: data.products,
+      totalPages: data.totalPages,
+      totalProducts: data.totalProducts,
+    };
   },
 
   async getProduct(id: string): Promise<Product> {
