@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { LayoutDashboard, Package, QrCode, Menu, MessageSquare, Star, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, QrCode, Menu, MessageSquare, Star, LogOut, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { ProtectedRoute } from './protected-route';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Products', href: '/dashboard/products', icon: Package },
+  { name: 'Warranty Claims', href: '/dashboard/warranty-claims', icon: ShieldCheck },
   { name: 'Contact Queries', href: '/dashboard/queries', icon: MessageSquare },
   { name: 'Testimonials', href: '/dashboard/testimonials', icon: Star },
 ];

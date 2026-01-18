@@ -105,3 +105,73 @@ export const testimonialsApi = {
     if (!response.ok) throw new Error('Failed to delete testimonial');
   },
 };
+
+export type WarrantyClaim = {
+  _id: string;
+  customer: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  warranty: {
+    status: 'active' | 'expired' | 'cancelled';
+    startDate: string;
+    endDate: string;
+    daysRemaining: number;
+    isExpired: boolean;
+  };
+  product: {
+    name: string;
+    category: string;
+    warranty: number;
+  };
+  serialNumber: {
+    serialNumber: string;
+  };
+  createdAt: string;
+};
+
+export type WarrantyClaimsResponse = {
+  status: string;
+  results: number;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalRecords: number;
+    recordsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+  data: WarrantyClaim[];
+};
+
+export type WarrantyClaimsFilters = {
+  page?: number;
+  limit?: number;
+  status?: 'active' | 'expired' | 'cancelled';
+  email?: string;
+  phone?: string;
+};
+
+export const warrantyClaimsApi = {
+  getAll: async (filters: WarrantyClaimsFilters = {}): Promise<WarrantyClaimsResponse> => {
+    const params = new URLSearchParams();
+
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.limit) params.append('limit', filters.limit.toString());
+    if (filters.status) params.append('status', filters.status);
+    if (filters.email) params.append('email', filters.email);
+    if (filters.phone) params.append('phone', filters.phone);
+
+    const queryString = params.toString();
+    const url = `${API_URL}/serial-numbers/warranty/all${queryString ? `?${queryString}` : ''}`;
+
+    const response = await fetch(url, {
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch warranty claims');
+    const data = await response.json();
+    return data;
+  },
+};
