@@ -281,10 +281,7 @@ export const api = {
     }
 
     // --- Files (only send if user picked new ones) ---
-    if (files[0]) {
-      form.append('imgCover', files[0]);
-      files.forEach(f => form.append('images', f));
-    }
+    files.forEach(f => form.append('images', f));
 
     const res = await fetch(`${API_URL}/products/${id}`, {
       method: 'PUT', // or 'PATCH' depending on your backend

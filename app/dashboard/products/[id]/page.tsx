@@ -164,7 +164,7 @@ export default function ViewProductPage() {
                   <img
                     src={image}
                     alt={`${product.name} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-white"
                   />
                   {index === 0 && (
                     <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">

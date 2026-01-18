@@ -128,7 +128,7 @@ export function ImageUpload({
             <Card key={`existing-${i}`} className="relative group overflow-hidden">
               <CardContent className="p-0">
                 <div className="aspect-square">
-                  <img src={src} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={src} alt={`Product ${i + 1}`} className="w-full h-full object-contain bg-white" />
                   <button
                     type="button"
                     onClick={() => handleRemoveExistingImage(i)}
@@ -145,7 +145,7 @@ export function ImageUpload({
             <Card key={`new-${i}`} className="relative group overflow-hidden">
               <CardContent className="p-0">
                 <div className="aspect-square">
-                  <img src={src} alt={`New ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={src} alt={`New ${i + 1}`} className="w-full h-full object-contain bg-white" />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(i)}
