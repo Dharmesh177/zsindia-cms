@@ -2,10 +2,8 @@
   "/not-found": "app/not-found.js",
   "/page": "app/page.js",
   "/icon.svg/route": "app/icon.svg/route.js",
-  "/login/page": "app/login/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/warranty-claims/page": "app/dashboard/warranty-claims/page.js",
   "/dashboard/products/page": "app/dashboard/products/page.js",
   "/dashboard/products/[id]/page": "app/dashboard/products/[id]/page.js",
-  "/dashboard/products/[id]/serial-numbers/page": "app/dashboard/products/[id]/serial-numbers/page.js"
+  "/dashboard/products/[id]/edit/page": "app/dashboard/products/[id]/edit/page.js"
 }

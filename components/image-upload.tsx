@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { X, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from './ui/input';
+import { OptimizedImage } from '@/components/optimized-image';
 
 interface ImageUploadProps {
   files: File[];
@@ -127,12 +128,18 @@ export function ImageUpload({
           {existingImages.map((src, i) => (
             <Card key={`existing-${i}`} className="relative group overflow-hidden">
               <CardContent className="p-0">
-                <div className="aspect-square">
-                  <img src={src} alt={`Product ${i + 1}`} className="w-full h-full object-contain bg-white" />
+                <div className="aspect-square relative">
+                  <OptimizedImage
+                    src={src}
+                    alt={`Product ${i + 1}`}
+                    containerClassName="w-full h-full"
+                    className="bg-white"
+                    objectFit="contain"
+                  />
                   <button
                     type="button"
                     onClick={() => handleRemoveExistingImage(i)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-1 transition-opacity"
+                    className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-1 transition-opacity"
                   >
                     <X className="h-4 w-4" />
                   </button>

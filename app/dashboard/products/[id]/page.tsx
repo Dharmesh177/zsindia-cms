@@ -21,6 +21,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
+import { getImageUrl } from '@/lib/utils';
+import { OptimizedImage } from '@/components/optimized-image';
 
 export default function ViewProductPage() {
   const params = useParams();
@@ -161,13 +163,16 @@ export default function ViewProductPage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {product.images.map((image, index) => (
                 <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
-                  <img
+                  <OptimizedImage
                     src={image}
                     alt={`${product.name} - Image ${index + 1}`}
-                    className="w-full h-full object-contain bg-white"
+                    containerClassName="w-full h-full"
+                    className="bg-white"
+                    objectFit="contain"
+                    priority={index === 0}
                   />
                   {index === 0 && (
-                    <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                    <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs px-2 py-1 rounded">
                       Primary
                     </div>
                   )}

@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle2, XCircle, AlertTriangle, Shield } from 'lucide-react';
+import { getImageUrl } from '@/lib/utils';
+import { OptimizedImage } from '@/components/optimized-image';
 
 export default function VerifyPage() {
   const params = useParams();
@@ -129,11 +131,13 @@ export default function VerifyPage() {
             {product.images && product.images.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {product.images.map((image, index) => (
-                  <div key={index} className="relative rounded-lg overflow-hidden shadow-md">
-                    <img
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden shadow-md">
+                    <OptimizedImage
                       src={image}
                       alt={`${product.name} - Image ${index + 1}`}
-                      className="w-full aspect-square object-cover"
+                      containerClassName="w-full h-full"
+                      objectFit="cover"
+                      priority={index === 0}
                     />
                   </div>
                 ))}
