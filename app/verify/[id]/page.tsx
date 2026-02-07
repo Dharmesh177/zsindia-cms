@@ -72,7 +72,7 @@ export default function VerifyPage() {
                   <p className="font-semibold mb-1">Warning</p>
                   <p>
                     This serial number could not be verified. This product may be counterfeit.
-                    Please contact ZSIndia support immediately if you purchased this product.
+                    Please contact ZS India support immediately if you purchased this product.
                   </p>
                 </div>
               </div>
@@ -93,7 +93,7 @@ export default function VerifyPage() {
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Authentic Product Verified</h1>
             <p className="text-gray-600">
-              This is a genuine ZSIndia product. See details below.
+              This is a genuine ZS India product. See details below.
             </p>
             {serialData && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
