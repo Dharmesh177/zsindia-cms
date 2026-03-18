@@ -114,11 +114,27 @@ export default function SerialNumbersPage() {
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
+    // Increase canvas height to accommodate text below QR code
     canvas.width = 1000;
-    canvas.height = 1000;
+    canvas.height = 1150; // Added 150px for text
 
     img.onload = () => {
-      ctx?.drawImage(img, 0, 0, 1000, 1000);
+      if (!ctx) return;
+      
+      // Fill white background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw QR code
+      ctx.drawImage(img, 0, 0, 1000, 1000);
+      
+      // Add serial number text below QR code
+      ctx.fillStyle = '#000000';
+      ctx.font = 'bold 36px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(serial.serialNumber, canvas.width / 2, 1075);
+      
       canvas.toBlob((blob) => {
         if (blob) {
           const url = URL.createObjectURL(blob);
@@ -342,18 +358,23 @@ export default function SerialNumbersPage() {
           <DialogHeader>
             <DialogTitle>QR Code</DialogTitle>
             <DialogDescription>
-              Serial Number: {selectedSerial?.serialNumber}
+              Download or print this QR code with serial number
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
             {selectedSerial && (
               <>
-                <QRCodeSVG
-                  value={`${baseUrl}/verify/${selectedSerial.serialNumber}`}
-                  size={300}
-                  level="H"
-                  includeMargin
-                />
+                <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+                  <QRCodeSVG
+                    value={`${baseUrl}/verify/${selectedSerial.serialNumber}`}
+                    size={300}
+                    level="H"
+                    includeMargin
+                  />
+                  <p className="text-center font-mono font-bold text-lg mt-2 text-gray-900">
+                    {selectedSerial.serialNumber}
+                  </p>
+                </div>
                 <p className="text-sm text-gray-600 text-center max-w-xs break-all">
                   {baseUrl}/verify/{selectedSerial.serialNumber}
                 </p>
