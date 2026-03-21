@@ -244,8 +244,8 @@ export const api = {
     (input.images || []).forEach(v => form.append('existingImages[]', v));
     
     // --- Existing thumbnail (for deletion handling) ---
-    form.append('existingThumbnail', input.thumbnail ?? '');
-
+    console.log('Existing thumbnail:', input.thumbnail);
+    
     // --- Array fields ---
     (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));
     (input.features || []).forEach(v => form.append('features[]', v));
@@ -280,8 +280,9 @@ export const api = {
       form.append('specifications[dimensions]', input.specifications.dimensions);
     if (input.specifications?.weight)
       form.append('specifications[weight]', input.specifications.weight);
-
+    
     // --- Thumbnail file ---
+    form.append('existingThumbnail', input.thumbnail ?? '');
     if (thumbnailFile) {
       form.append('thumbnail', thumbnailFile);
     }
@@ -290,7 +291,7 @@ export const api = {
     files.forEach(f => form.append('images', f));
 
     const res = await fetch(`${API_URL}/products/${id}`, {
-      method: 'PUT', // or 'PATCH' depending on your backend
+      method: 'PUT',
       headers: {
         token,
       },
