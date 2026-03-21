@@ -262,7 +262,10 @@ export function ProductForm({ product, mode }: ProductFormProps) {
               <ImageUpload
                 files={thumbnailFile ? [thumbnailFile] : []}
                 existingImages={existingThumbnail ? [existingThumbnail] : []}
-                onRemoveExisting={() => setExistingThumbnail('')}
+                onRemoveExisting={() => {
+                  setExistingThumbnail('');
+                  setThumbnailFile(null); // Also clear any pending new file
+                }}
                 maxImages={1}
                 minImages={0}
                 onChange={(files: File[]) => setThumbnailFile(files[0] || null)}
