@@ -84,6 +84,14 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate minimum images before submit
+    const totalImages = existingImages.length + selectedFiles.length;
+    if (totalImages < 1) {
+      toast.error('You must have at least 1 product image');
+      return;
+    }
+    
     setLoading(true);
 
     try {

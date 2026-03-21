@@ -76,24 +76,12 @@ export function ImageUpload({
   };
 
   const handleRemoveImage = (index: number) => {
-    const totalImages = existingImages.length + files.length;
-    if (totalImages <= minImages) {
-      toast.error(`You must have at least ${minImages} image(s)`);
-      return;
-    }
-
     const updated = files.filter((_, i) => i !== index);
     onChange(updated);
     toast.success('Image removed');
   };
 
   const handleRemoveExistingImage = (index: number) => {
-    const totalImages = existingImages.length + files.length;
-    if (totalImages <= minImages) {
-      toast.error(`You must have at least ${minImages} image(s)`);
-      return;
-    }
-
     if (onRemoveExisting) {
       onRemoveExisting(index);
       toast.success('Image removed');
