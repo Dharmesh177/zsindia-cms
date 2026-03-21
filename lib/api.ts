@@ -240,6 +240,12 @@ export const api = {
     form.append('warranty', input.warranty ?? '');
     form.append('isTopSellingProduct', input.isTopSellingProduct ? 'true' : 'false');
 
+    // --- Existing images to keep (for deletion handling) ---
+    (input.images || []).forEach(v => form.append('existingImages[]', v));
+    
+    // --- Existing thumbnail (for deletion handling) ---
+    form.append('existingThumbnail', input.thumbnail ?? '');
+
     // --- Array fields ---
     (input.keyHighlights || []).forEach(v => form.append('keyHighlights[]', v));
     (input.features || []).forEach(v => form.append('features[]', v));
