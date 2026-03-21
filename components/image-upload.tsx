@@ -127,7 +127,7 @@ export function ImageUpload({
                   <button
                     type="button"
                     onClick={() => handleRemoveExistingImage(i)}
-                    className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-1 transition-opacity"
+                    className="absolute top-2 right-2 z-10 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -144,7 +144,7 @@ export function ImageUpload({
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(i)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full p-1 transition-opacity"
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>

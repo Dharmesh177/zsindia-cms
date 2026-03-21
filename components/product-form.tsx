@@ -73,9 +73,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     if (product?.images) {
       setExistingImages(product.images);
     }
-    if (product?.thumbnail) {
-      setExistingThumbnail(product.thumbnail);
-    }
+    // Always sync thumbnail (even when cleared to empty string)
+    setExistingThumbnail(product?.thumbnail || '');
   }, [product]);
 
   const handleRemoveExistingImage = (index: number) => {
