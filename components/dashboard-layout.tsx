@@ -82,7 +82,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-blue-600 to-blue-800">
+            <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-blue-600 to-blue-800 flex flex-col [&>button]:text-white [&>button]:opacity-80 [&>button]:hover:opacity-100 [&>button]:hover:bg-blue-700 [&>button]:rounded-md [&>button]:focus:ring-white [&>button]:focus:ring-offset-blue-700">
               <div className="flex items-center h-20 px-6 border-b border-blue-500">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
@@ -94,7 +94,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 </div>
               </div>
-              <nav className="px-4 py-6 space-y-2">
+              <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
                 {navigation.map((item) => {
                   const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                   return (
@@ -113,6 +113,21 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   );
                 })}
               </nav>
+              <div className="p-4 border-t border-blue-500 space-y-3">
+                <div className="text-xs text-blue-200 text-center mb-2">
+                  <p className="font-medium">{user?.name}</p>
+                  <p className="text-blue-300 mt-1">{user?.email}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  className="w-full text-white hover:bg-blue-700 hover:text-white"
+                  onClick={() => { setMobileMenuOpen(false); signOut(); }}
+                >
+                  <LogOut className="mr-3 h-5 w-5" />
+                  Sign Out
+                </Button>
+                <p className="text-xs text-blue-200 text-center">ZS Acoustics</p>
+              </div>
             </SheetContent>
           </Sheet>
           <div className="flex-1">

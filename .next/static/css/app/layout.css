@@ -3358,6 +3358,37 @@ video {
   padding-right: 0px;
 }
 
+.\[\&\>button\]\:rounded-md>button {
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.\[\&\>button\]\:text-white>button {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.\[\&\>button\]\:opacity-80>button {
+  opacity: 0.8;
+}
+
+.\[\&\>button\]\:hover\:bg-blue-700:hover>button {
+  --tw-bg-opacity: 1;
+  background-color: rgb(29 78 216 / var(--tw-bg-opacity));
+}
+
+.\[\&\>button\]\:hover\:opacity-100:hover>button {
+  opacity: 1;
+}
+
+.\[\&\>button\]\:focus\:ring-white:focus>button {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(255 255 255 / var(--tw-ring-opacity));
+}
+
+.\[\&\>button\]\:focus\:ring-offset-blue-700:focus>button {
+  --tw-ring-offset-color: #1d4ed8;
+}
+
 .\[\&\>span\]\:line-clamp-1>span {
   overflow: hidden;
   display: -webkit-box;
