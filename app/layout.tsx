@@ -9,6 +9,13 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'ZSAcoustics Admin - Product Management Portal',
   description: 'Professional product authoring and QR verification platform for ZSAcoustics sound engineering products',
+  icons: {
+    icon: [
+      { url: 'https://zsindia.s3.us-east-1.amazonaws.com/SiteImages/zsindia-logo.png', type: 'image/png' },
+    ],
+    shortcut: 'https://zsindia.s3.us-east-1.amazonaws.com/SiteImages/zsindia-logo.png',
+    apple: 'https://zsindia.s3.us-east-1.amazonaws.com/SiteImages/zsindia-logo.png',
+  },
 };
 
 export default function RootLayout({
