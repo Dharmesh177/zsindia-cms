@@ -281,22 +281,10 @@ export const api = {
     if (input.specifications?.weight)
       form.append('specifications[weight]', input.specifications.weight);
     
-    // --- Thumbnail file ---
-    // form.append('existingThumbnail', input.thumbnail ?? '');
-    // if (thumbnailFile) {
-    //   form.append('thumbnail', thumbnailFile);
-    // }
-
-    // --- Thumbnail handling ---
     if (thumbnailFile) {
-      // Case: Replace thumbnail
       form.append('thumbnail', thumbnailFile);
-    } else if (!input.thumbnail) {
-      // Case: Remove thumbnail
-      form.append('existingThumbnail', 'null'); // explicit delete signal
     } else {
-      // Case: Keep existing
-      form.append('existingThumbnail', input.thumbnail);
+      form.append('existingThumbnail', input.thumbnail || '');
     }
 
     // --- Files (only send if user picked new ones) ---

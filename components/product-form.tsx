@@ -98,6 +98,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
         await api.createProduct(formData, selectedFiles, thumbnailFile);
         toast.success('Product created successfully');
       } else if (mode === 'edit' && product?._id) {
+        console.log('Submitting with existing images:', existingImages);
+        console.log('Submitting with thumbnail:', existingThumbnail);
         const updatedFormData = { ...formData, images: existingImages, thumbnail: existingThumbnail };
         await api.updateProduct(product._id, updatedFormData, selectedFiles, thumbnailFile);
         toast.success('Product updated successfully');
