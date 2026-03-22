@@ -100,7 +100,7 @@ export default function Home() {
         </div>
 
         <div className="text-center mt-16">
-          <p className="text-blue-300 text-sm">Sound Engineering Excellence Since 2000</p>
+          <p className="text-blue-300 text-sm">ZS Acoustics</p>
         </div>
       </div>
     </div>

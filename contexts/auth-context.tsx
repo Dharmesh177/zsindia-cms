@@ -52,12 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const userData = {
-        name: email,
-        email: password,
+        name: data.user?.name || data.name,
+        email: email,
       };
 
       localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('token', data.token || data.accessToken);
       setUser(userData);
       router.push('/dashboard');
 
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
     setUser(null);
-    router.push('/user/signin');
+    router.push('/login');
   };
 
   const value = {

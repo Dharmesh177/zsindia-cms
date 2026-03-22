@@ -70,7 +70,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <LogOut className="mr-3 h-5 w-5" />
             Sign Out
           </Button>
-          <p className="text-xs text-blue-200 text-center">Sound Engineering Excellence</p>
+          <p className="text-xs text-blue-200 text-center">ZS Acoustics</p>
         </div>
       </aside>
 
