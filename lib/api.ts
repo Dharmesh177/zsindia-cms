@@ -283,9 +283,9 @@ export const api = {
     
     // --- Thumbnail file ---
     // form.append('existingThumbnail', input.thumbnail ?? '');
-    if (thumbnailFile) {
-      form.append('thumbnail', thumbnailFile);
-    }
+    // if (thumbnailFile) {
+    //   form.append('thumbnail', thumbnailFile);
+    // }
 
     // --- Thumbnail handling ---
     if (thumbnailFile) {
