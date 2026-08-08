@@ -1,0 +1,18 @@
+{
+  "/_not-found": "/_not-found",
+  "/icon.svg/route": "/icon.svg",
+  "/page": "/",
+  "/login/page": "/login",
+  "/signup/page": "/signup",
+  "/verify/[id]/page": "/verify/[id]",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/products/page": "/dashboard/products",
+  "/dashboard/queries/page": "/dashboard/queries",
+  "/dashboard/verify-product/page": "/dashboard/verify-product",
+  "/dashboard/warranty-claims/page": "/dashboard/warranty-claims",
+  "/dashboard/products/new/page": "/dashboard/products/new",
+  "/dashboard/testimonials/page": "/dashboard/testimonials",
+  "/dashboard/products/[id]/page": "/dashboard/products/[id]",
+  "/dashboard/products/[id]/edit/page": "/dashboard/products/[id]/edit",
+  "/dashboard/products/[id]/serial-numbers/page": "/dashboard/products/[id]/serial-numbers"
+}

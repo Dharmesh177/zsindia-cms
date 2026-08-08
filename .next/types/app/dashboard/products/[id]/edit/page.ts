@@ -1,4 +1,4 @@
-// File: D:\Temp\zsindia-cms\app\dashboard\products\[id]\edit\page.tsx
+// File: D:\zsindia\zsindia-cms\app\dashboard\products\[id]\edit\page.tsx
 import * as entry from '../../../../../../../app/dashboard/products/[id]/edit/page.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

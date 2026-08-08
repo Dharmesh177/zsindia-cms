@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { api, Product, SerialNumber } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,26 +23,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
-import { Download, QrCode, ArrowLeft, Plus, Ban } from 'lucide-react';
+import { Download, QrCode, ArrowLeft, Plus, Ban, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 import Link from 'next/link';
+import {
+  exportQRCodes,
+  getUniqueBatches,
+  downloadSingleQR,
+  QRExportFormat,
+  QR_CODES_PER_A4_PAGE,
+} from '@/lib/qr-export';
+
+const ALL_BATCHES = 'all';
 
 export default function SerialNumbersPage() {
   const params = useParams();
-  const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [serialNumbers, setSerialNumbers] = useState<SerialNumber[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [showQRDialog, setShowQRDialog] = useState(false);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [selectedSerial, setSelectedSerial] = useState<SerialNumber | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState('');
+  const [downloadBatch, setDownloadBatch] = useState(ALL_BATCHES);
+  const [downloadFormat, setDownloadFormat] = useState<QRExportFormat>('pdf');
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
 
-  // Get the base URL for QR codes
   const baseUrl = 'https://zsindia.com';
 
   useEffect(() => {
@@ -66,9 +86,26 @@ export default function SerialNumbersPage() {
     }
   };
 
+  const activeSerials = useMemo(
+    () => serialNumbers.filter((s) => s.status === 'active'),
+    [serialNumbers]
+  );
+
+  const batches = useMemo(() => getUniqueBatches(serialNumbers), [serialNumbers]);
+
+  const serialsForDownload = useMemo(() => {
+    if (downloadBatch === ALL_BATCHES) return activeSerials;
+    return activeSerials.filter((s) => s.batchNumber === downloadBatch);
+  }, [activeSerials, downloadBatch]);
+
   const handleGenerate = async () => {
     if (quantity < 1 || quantity > 1000) {
       toast.error('Quantity must be between 1 and 1000');
+      return;
+    }
+
+    if (!batchNumber.trim()) {
+      toast.error('Batch number is required');
       return;
     }
 
@@ -77,7 +114,7 @@ export default function SerialNumbersPage() {
       const newSerials = await api.generateSerialNumbers(
         params.id as string,
         quantity,
-        batchNumber || undefined
+        batchNumber.trim()
       );
       setSerialNumbers([...newSerials, ...serialNumbers]);
       toast.success(`${quantity} serial number(s) generated successfully`);
@@ -95,9 +132,11 @@ export default function SerialNumbersPage() {
   const handleDeactivate = async (serialId: string) => {
     try {
       await api.deactivateSerialNumber(serialId);
-      setSerialNumbers(serialNumbers.map(s =>
-        s._id === serialId ? { ...s, status: 'deactivated' } : s
-      ));
+      setSerialNumbers(
+        serialNumbers.map((s) =>
+          s._id === serialId ? { ...s, status: 'deactivated' } : s
+        )
+      );
       toast.success('Serial number deactivated');
     } catch (error) {
       console.error('Failed to deactivate:', error);
@@ -105,56 +144,66 @@ export default function SerialNumbersPage() {
     }
   };
 
-  const downloadQR = (serial: SerialNumber) => {
-    const svg = document.getElementById(`qr-${serial._id}`);
-    if (!svg) return;
+  const handleDownloadSingle = async (serial: SerialNumber) => {
+    if (!product) return;
 
-    const svgData = new XMLSerializer().serializeToString(svg);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-
-    // Increase canvas height to accommodate text below QR code
-    canvas.width = 1000;
-    canvas.height = 1150; // Added 150px for text
-
-    img.onload = () => {
-      if (!ctx) return;
-      
-      // Fill white background
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw QR code
-      ctx.drawImage(img, 0, 0, 1000, 1000);
-      
-      // Add serial number text below QR code
-      ctx.fillStyle = '#000000';
-      ctx.font = 'bold 36px Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(serial.serialNumber, canvas.width / 2, 1075);
-      
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${product?.slug}-${serial.serialNumber}.png`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-      });
-    };
-
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    try {
+      await downloadSingleQR(
+        `${baseUrl}/verify/${serial.serialNumber}`,
+        product.name,
+        product.slug,
+        serial.serialNumber,
+        serial.batchNumber || 'no-batch'
+      );
+      toast.success('QR code downloaded');
+    } catch (error) {
+      console.error('Failed to download QR code:', error);
+      toast.error('Failed to download QR code');
+    }
   };
 
-  const downloadAllQRs = () => {
-    serialNumbers.filter(s => s.status === 'active').forEach((serial, index) => {
-      setTimeout(() => downloadQR(serial), index * 100);
-    });
-    toast.success('Downloading all QR codes...');
+  const handleBulkDownload = async () => {
+    if (!product || serialsForDownload.length === 0) return;
+
+    if (downloadFormat === 'png' && serialsForDownload.length > 20) {
+      toast.warning('Separate PNG downloads may be blocked by the browser. ZIP is recommended for large batches.');
+    }
+
+    const batchLabel =
+      downloadBatch === ALL_BATCHES ? 'all-batches' : downloadBatch;
+
+    try {
+      setDownloading(true);
+      setDownloadProgress({ current: 0, total: serialsForDownload.length });
+
+      await exportQRCodes({
+        productName: product.name,
+        productSlug: product.slug,
+        batchLabel,
+        format: downloadFormat,
+        items: serialsForDownload.map((serial) => ({
+          serialNumber: serial.serialNumber,
+          batchNumber: serial.batchNumber || 'no-batch',
+          verifyUrl: `${baseUrl}/verify/${serial.serialNumber}`,
+        })),
+        onProgress: (current, total) => setDownloadProgress({ current, total }),
+      });
+
+      toast.success(
+        downloadFormat === 'pdf'
+          ? 'PDF downloaded successfully'
+          : downloadFormat === 'zip'
+            ? 'ZIP downloaded successfully'
+            : 'QR codes downloaded'
+      );
+      setShowDownloadDialog(false);
+    } catch (error) {
+      console.error('Failed to export QR codes:', error);
+      toast.error('Failed to export QR codes');
+    } finally {
+      setDownloading(false);
+      setDownloadProgress({ current: 0, total: 0 });
+    }
   };
 
   if (loading) {
@@ -173,8 +222,8 @@ export default function SerialNumbersPage() {
     );
   }
 
-  const activeSerials = serialNumbers.filter(s => s.status === 'active');
-  const deactivatedSerials = serialNumbers.filter(s => s.status === 'deactivated');
+  const deactivatedSerials = serialNumbers.filter((s) => s.status === 'deactivated');
+  const estimatedPdfPages = Math.ceil(serialsForDownload.length / QR_CODES_PER_A4_PAGE);
 
   return (
     <div className="space-y-6">
@@ -189,9 +238,13 @@ export default function SerialNumbersPage() {
           <p className="text-gray-500 mt-1">{product.name}</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={downloadAllQRs} variant="outline" disabled={activeSerials.length === 0}>
+          <Button
+            onClick={() => setShowDownloadDialog(true)}
+            variant="outline"
+            disabled={activeSerials.length === 0}
+          >
             <Download className="mr-2 h-4 w-4" />
-            Download All
+            Download QR Codes
           </Button>
           <Button onClick={() => setShowGenerateDialog(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -286,20 +339,19 @@ export default function SerialNumbersPage() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          onClick={() => handleDownloadSingle(serial)}
+                          disabled={serial.status === 'deactivated'}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() => handleDeactivate(serial._id)}
                           disabled={serial.status === 'deactivated'}
                         >
                           <Ban className="h-4 w-4 text-red-500" />
                         </Button>
-                      </div>
-                      <div className="hidden">
-                        <QRCodeSVG
-                          id={`qr-${serial._id}`}
-                          value={`${baseUrl}/verify/${serial.serialNumber}`}
-                          size={1000}
-                          level="H"
-                          includeMargin
-                        />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -315,7 +367,7 @@ export default function SerialNumbersPage() {
           <DialogHeader>
             <DialogTitle>Generate Serial Numbers</DialogTitle>
             <DialogDescription>
-              Create unique serial numbers for product units
+              Create unique serial numbers for product units in a batch
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -333,21 +385,129 @@ export default function SerialNumbersPage() {
               <p className="text-xs text-gray-500">Maximum 1000 per batch</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="batch">Batch Number (Optional)</Label>
+              <Label htmlFor="batch">Batch Number</Label>
               <Input
                 id="batch"
                 value={batchNumber}
                 onChange={(e) => setBatchNumber(e.target.value)}
-                placeholder="e.g., BATCH-2024-01"
+                placeholder="e.g., Q1-2026 or BATCH-2024-01"
+                required
               />
+              <p className="text-xs text-gray-500">Required — used to group and download QR codes</p>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowGenerateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleGenerate} disabled={generating}>
+            <Button onClick={handleGenerate} disabled={generating || !batchNumber.trim()}>
               {generating ? 'Generating...' : 'Generate'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Download QR Codes</DialogTitle>
+            <DialogDescription>
+              Select a batch and format. Batch number is included in the file name.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label>Batch</Label>
+              <Select value={downloadBatch} onValueChange={setDownloadBatch}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select batch" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_BATCHES}>
+                    All batches ({activeSerials.length} codes)
+                  </SelectItem>
+                  {batches.map((batch) => {
+                    const count = activeSerials.filter((s) => s.batchNumber === batch).length;
+                    return (
+                      <SelectItem key={batch} value={batch}>
+                        {batch} ({count} codes)
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Format</Label>
+              <RadioGroup
+                value={downloadFormat}
+                onValueChange={(value) => setDownloadFormat(value as QRExportFormat)}
+              >
+                <div className="flex items-start space-x-2">
+                  <RadioGroupItem value="pdf" id="format-pdf" className="mt-1" />
+                  <Label htmlFor="format-pdf" className="font-normal cursor-pointer">
+                    <span className="font-medium">Merged PDF</span>
+                    <span className="block text-xs text-gray-500">
+                      {QR_CODES_PER_A4_PAGE} QR codes per A4 page — best for printing
+                      {serialsForDownload.length > 0 && ` (~${estimatedPdfPages} pages)`}
+                    </span>
+                  </Label>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <RadioGroupItem value="zip" id="format-zip" className="mt-1" />
+                  <Label htmlFor="format-zip" className="font-normal cursor-pointer">
+                    <span className="font-medium">ZIP of PNGs</span>
+                    <span className="block text-xs text-gray-500">
+                      One download, separate PNG files inside
+                    </span>
+                  </Label>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <RadioGroupItem value="png" id="format-png" className="mt-1" />
+                  <Label htmlFor="format-png" className="font-normal cursor-pointer">
+                    <span className="font-medium">Separate PNG files</span>
+                    <span className="block text-xs text-gray-500">
+                      Individual downloads — use for small batches only
+                    </span>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {serialsForDownload.length > 0 && (
+              <p className="text-sm text-gray-600">
+                {serialsForDownload.length} QR code(s) will be exported with product name and serial
+                on each label.
+              </p>
+            )}
+
+            {downloading && downloadProgress.total > 0 && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Generating {downloadProgress.current} of {downloadProgress.total}...
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDownloadDialog(false)} disabled={downloading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleBulkDownload}
+              disabled={downloading || serialsForDownload.length === 0}
+            >
+              {downloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -358,7 +518,7 @@ export default function SerialNumbersPage() {
           <DialogHeader>
             <DialogTitle>QR Code</DialogTitle>
             <DialogDescription>
-              Download or print this QR code with serial number
+              Download or print this QR code with product name and serial number
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center space-y-4">
@@ -371,7 +531,10 @@ export default function SerialNumbersPage() {
                     level="H"
                     includeMargin
                   />
-                  <p className="text-center font-mono font-bold text-lg mt-2 text-gray-900">
+                  <p className="text-center font-bold text-base mt-3 text-gray-900">
+                    {product.name}
+                  </p>
+                  <p className="text-center font-mono font-bold text-sm mt-1 text-gray-700">
                     {selectedSerial.serialNumber}
                   </p>
                 </div>
@@ -380,7 +543,7 @@ export default function SerialNumbersPage() {
                 </p>
               </>
             )}
-            <Button onClick={() => selectedSerial && downloadQR(selectedSerial)}>
+            <Button onClick={() => selectedSerial && handleDownloadSingle(selectedSerial)}>
               <Download className="mr-2 h-4 w-4" />
               Download QR Code
             </Button>
