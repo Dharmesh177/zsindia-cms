@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api, Product, SerialNumber } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,7 @@ import {
   QRExportFormat,
   QR_CODES_PER_A4_PAGE,
 } from '@/lib/qr-export';
+import { QRExportOverlay } from '@/components/qr-export-overlay';
 
 const ALL_BATCHES = 'all';
 
@@ -62,6 +63,8 @@ export default function SerialNumbersPage() {
   const [downloadFormat, setDownloadFormat] = useState<QRExportFormat>('pdf');
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
+  const [exportMessage, setExportMessage] = useState('Preparing QR codes for download...');
+  const exportInProgressRef = useRef(false);
 
   const baseUrl = 'https://zsindia.com';
 
@@ -145,7 +148,12 @@ export default function SerialNumbersPage() {
   };
 
   const handleDownloadSingle = async (serial: SerialNumber) => {
-    if (!product) return;
+    if (!product || exportInProgressRef.current) return;
+
+    exportInProgressRef.current = true;
+    setDownloading(true);
+    setExportMessage('Generating QR code...');
+    setDownloadProgress({ current: 0, total: 1 });
 
     try {
       await downloadSingleQR(
@@ -155,15 +163,20 @@ export default function SerialNumbersPage() {
         serial.serialNumber,
         serial.batchNumber || 'no-batch'
       );
+      setDownloadProgress({ current: 1, total: 1 });
       toast.success('QR code downloaded');
     } catch (error) {
       console.error('Failed to download QR code:', error);
       toast.error('Failed to download QR code');
+    } finally {
+      exportInProgressRef.current = false;
+      setDownloading(false);
+      setDownloadProgress({ current: 0, total: 0 });
     }
   };
 
   const handleBulkDownload = async () => {
-    if (!product || serialsForDownload.length === 0) return;
+    if (!product || serialsForDownload.length === 0 || exportInProgressRef.current) return;
 
     if (downloadFormat === 'png' && serialsForDownload.length > 20) {
       toast.warning('Separate PNG downloads may be blocked by the browser. ZIP is recommended for large batches.');
@@ -172,10 +185,18 @@ export default function SerialNumbersPage() {
     const batchLabel =
       downloadBatch === ALL_BATCHES ? 'all-batches' : downloadBatch;
 
-    try {
-      setDownloading(true);
-      setDownloadProgress({ current: 0, total: serialsForDownload.length });
+    exportInProgressRef.current = true;
+    setDownloading(true);
+    setExportMessage(
+      downloadFormat === 'pdf'
+        ? 'Building PDF — one QR code per page...'
+        : downloadFormat === 'zip'
+          ? 'Creating ZIP archive...'
+          : 'Downloading PNG files...'
+    );
+    setDownloadProgress({ current: 0, total: serialsForDownload.length });
 
+    try {
       await exportQRCodes({
         productName: product.name,
         productSlug: product.slug,
@@ -201,6 +222,7 @@ export default function SerialNumbersPage() {
       console.error('Failed to export QR codes:', error);
       toast.error('Failed to export QR codes');
     } finally {
+      exportInProgressRef.current = false;
       setDownloading(false);
       setDownloadProgress({ current: 0, total: 0 });
     }
@@ -226,10 +248,16 @@ export default function SerialNumbersPage() {
   const estimatedPdfPages = Math.ceil(serialsForDownload.length / QR_CODES_PER_A4_PAGE);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" aria-busy={downloading}>
+      <QRExportOverlay
+        open={downloading}
+        current={downloadProgress.current}
+        total={downloadProgress.total}
+        message={exportMessage}
+      />
       <div className="flex items-center gap-4">
         <Link href={`/dashboard/products/${params.id}`}>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" disabled={downloading}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
         </Link>
@@ -241,12 +269,12 @@ export default function SerialNumbersPage() {
           <Button
             onClick={() => setShowDownloadDialog(true)}
             variant="outline"
-            disabled={activeSerials.length === 0}
+            disabled={activeSerials.length === 0 || downloading}
           >
             <Download className="mr-2 h-4 w-4" />
             Download QR Codes
           </Button>
-          <Button onClick={() => setShowGenerateDialog(true)}>
+          <Button onClick={() => setShowGenerateDialog(true)} disabled={downloading}>
             <Plus className="mr-2 h-4 w-4" />
             Generate
           </Button>
@@ -284,7 +312,7 @@ export default function SerialNumbersPage() {
             <div className="text-center py-12">
               <QrCode className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 mb-4">No serial numbers generated yet</p>
-              <Button onClick={() => setShowGenerateDialog(true)}>
+              <Button onClick={() => setShowGenerateDialog(true)} disabled={downloading}>
                 <Plus className="mr-2 h-4 w-4" />
                 Generate Serial Numbers
               </Button>
@@ -332,7 +360,7 @@ export default function SerialNumbersPage() {
                             setSelectedSerial(serial);
                             setShowQRDialog(true);
                           }}
-                          disabled={serial.status === 'deactivated'}
+                          disabled={serial.status === 'deactivated' || downloading}
                         >
                           <QrCode className="h-4 w-4" />
                         </Button>
@@ -340,7 +368,7 @@ export default function SerialNumbersPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDownloadSingle(serial)}
-                          disabled={serial.status === 'deactivated'}
+                          disabled={serial.status === 'deactivated' || downloading}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -348,7 +376,7 @@ export default function SerialNumbersPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleDeactivate(serial._id)}
-                          disabled={serial.status === 'deactivated'}
+                          disabled={serial.status === 'deactivated' || downloading}
                         >
                           <Ban className="h-4 w-4 text-red-500" />
                         </Button>
@@ -362,7 +390,13 @@ export default function SerialNumbersPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={showGenerateDialog} onOpenChange={setShowGenerateDialog}>
+      <Dialog
+        open={showGenerateDialog}
+        onOpenChange={(open) => {
+          if (!open && downloading) return;
+          setShowGenerateDialog(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Generate Serial Numbers</DialogTitle>
@@ -407,7 +441,13 @@ export default function SerialNumbersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showDownloadDialog} onOpenChange={setShowDownloadDialog}>
+      <Dialog
+        open={showDownloadDialog}
+        onOpenChange={(open) => {
+          if (!open && downloading) return;
+          setShowDownloadDialog(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Download QR Codes</DialogTitle>
@@ -418,7 +458,7 @@ export default function SerialNumbersPage() {
           <div className="space-y-5">
             <div className="space-y-2">
               <Label>Batch</Label>
-              <Select value={downloadBatch} onValueChange={setDownloadBatch}>
+              <Select value={downloadBatch} onValueChange={setDownloadBatch} disabled={downloading}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select batch" />
                 </SelectTrigger>
@@ -443,13 +483,14 @@ export default function SerialNumbersPage() {
               <RadioGroup
                 value={downloadFormat}
                 onValueChange={(value) => setDownloadFormat(value as QRExportFormat)}
+                disabled={downloading}
               >
                 <div className="flex items-start space-x-2">
                   <RadioGroupItem value="pdf" id="format-pdf" className="mt-1" />
                   <Label htmlFor="format-pdf" className="font-normal cursor-pointer">
                     <span className="font-medium">Merged PDF</span>
                     <span className="block text-xs text-gray-500">
-                      {QR_CODES_PER_A4_PAGE} QR codes per A4 page — best for printing
+                      1 QR code per A4 page — ready to print
                       {serialsForDownload.length > 0 && ` (~${estimatedPdfPages} pages)`}
                     </span>
                   </Label>
@@ -475,18 +516,11 @@ export default function SerialNumbersPage() {
               </RadioGroup>
             </div>
 
-            {serialsForDownload.length > 0 && (
+            {serialsForDownload.length > 0 && !downloading && (
               <p className="text-sm text-gray-600">
                 {serialsForDownload.length} QR code(s) will be exported with product name and serial
                 on each label.
               </p>
-            )}
-
-            {downloading && downloadProgress.total > 0 && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating {downloadProgress.current} of {downloadProgress.total}...
-              </div>
             )}
           </div>
           <DialogFooter>
@@ -513,7 +547,13 @@ export default function SerialNumbersPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+      <Dialog
+        open={showQRDialog}
+        onOpenChange={(open) => {
+          if (!open && downloading) return;
+          setShowQRDialog(open);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>QR Code</DialogTitle>
@@ -543,7 +583,10 @@ export default function SerialNumbersPage() {
                 </p>
               </>
             )}
-            <Button onClick={() => selectedSerial && handleDownloadSingle(selectedSerial)}>
+            <Button
+              onClick={() => selectedSerial && handleDownloadSingle(selectedSerial)}
+              disabled={downloading}
+            >
               <Download className="mr-2 h-4 w-4" />
               Download QR Code
             </Button>

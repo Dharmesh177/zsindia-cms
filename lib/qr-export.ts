@@ -22,12 +22,11 @@ export interface QRExportOptions {
 const CANVAS_SIZE = 800;
 const TEXT_AREA_HEIGHT = 130;
 
-/** 3 columns × 4 rows = 12 QR codes per A4 page (readable size, no overflow). */
-const PDF_COLS = 3;
-const PDF_ROWS = 4;
+/** One QR code per A4 page for easy print-and-cut. */
+export const QR_CODES_PER_A4_PAGE = 1;
 const PDF_PAGE_WIDTH = 210;
 const PDF_PAGE_HEIGHT = 297;
-const PDF_MARGIN = 8;
+const PDF_MARGIN = 15;
 
 function sanitizeFilename(value: string): string {
   return value.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -134,47 +133,24 @@ async function exportAsPdf(
 
   const usableWidth = PDF_PAGE_WIDTH - PDF_MARGIN * 2;
   const usableHeight = PDF_PAGE_HEIGHT - PDF_MARGIN * 2;
-  const cellWidth = usableWidth / PDF_COLS;
-  const cellHeight = usableHeight / PDF_ROWS;
-  const qrMaxSize = Math.min(cellWidth - 6, cellHeight - 18);
-  const labelHeight = 14;
 
-  let itemIndex = 0;
-  while (itemIndex < canvases.length) {
-    if (itemIndex > 0) pdf.addPage();
+  canvases.forEach((canvas, index) => {
+    if (index > 0) pdf.addPage();
 
-    for (let row = 0; row < PDF_ROWS && itemIndex < canvases.length; row++) {
-      for (let col = 0; col < PDF_COLS && itemIndex < canvases.length; col++) {
-        const canvas = canvases[itemIndex];
-        const item = items[itemIndex];
-        const dataUrl = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/png');
+    const aspectRatio = canvas.width / canvas.height;
+    let imageWidth = usableWidth;
+    let imageHeight = imageWidth / aspectRatio;
 
-        const x = PDF_MARGIN + col * cellWidth;
-        const y = PDF_MARGIN + row * cellHeight;
-        const qrX = x + (cellWidth - qrMaxSize) / 2;
-        const qrY = y + 2;
-
-        pdf.addImage(dataUrl, 'PNG', qrX, qrY, qrMaxSize, qrMaxSize);
-
-        pdf.setFontSize(7);
-        pdf.setFont('helvetica', 'bold');
-        const productText = pdf.splitTextToSize(productName, cellWidth - 4);
-        pdf.text(productText.slice(0, 2), x + cellWidth / 2, qrY + qrMaxSize + 4, {
-          align: 'center',
-          maxWidth: cellWidth - 4,
-        });
-
-        pdf.setFont('courier', 'normal');
-        pdf.setFontSize(6);
-        pdf.text(item.serialNumber, x + cellWidth / 2, qrY + qrMaxSize + labelHeight, {
-          align: 'center',
-          maxWidth: cellWidth - 4,
-        });
-
-        itemIndex++;
-      }
+    if (imageHeight > usableHeight) {
+      imageHeight = usableHeight;
+      imageWidth = imageHeight * aspectRatio;
     }
-  }
+
+    const x = (PDF_PAGE_WIDTH - imageWidth) / 2;
+    const y = (PDF_PAGE_HEIGHT - imageHeight) / 2;
+    pdf.addImage(dataUrl, 'PNG', x, y, imageWidth, imageHeight);
+  });
 
   pdf.save(`${buildExportBasename(productSlug, batchLabel)}.pdf`);
 }
@@ -243,8 +219,6 @@ export function getUniqueBatches(
     .forEach((s) => batches.add(s.batchNumber!));
   return Array.from(batches).sort();
 }
-
-export const QR_CODES_PER_A4_PAGE = PDF_COLS * PDF_ROWS;
 
 export async function downloadSingleQR(
   verifyUrl: string,
