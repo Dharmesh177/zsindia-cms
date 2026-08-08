@@ -1,7 +1,6 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 
 interface QRExportOverlayProps {
   open: boolean;
@@ -35,7 +34,12 @@ export function QRExportOverlay({
           <p className="mt-2 text-sm text-gray-500">{message}</p>
           {total > 0 && (
             <div className="mt-6 w-full space-y-2">
-              <Progress value={progress} className="h-2" />
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
               <p className="text-sm text-gray-600">
                 {current} of {total} ({progress}%)
               </p>

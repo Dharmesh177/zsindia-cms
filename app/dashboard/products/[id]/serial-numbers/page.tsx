@@ -36,14 +36,14 @@ import { Download, QrCode, ArrowLeft, Plus, Ban, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 import Link from 'next/link';
-import {
-  exportQRCodes,
-  getUniqueBatches,
-  downloadSingleQR,
-  QRExportFormat,
-  QR_CODES_PER_A4_PAGE,
-} from '@/lib/qr-export';
-import { QRExportOverlay } from '@/components/qr-export-overlay';
+import dynamic from 'next/dynamic';
+import type { QRExportFormat } from '@/lib/qr-export';
+import { getUniqueBatches, QR_CODES_PER_A4_PAGE } from '@/lib/qr-batch-utils';
+
+const QRExportOverlay = dynamic(
+  () => import('@/components/qr-export-overlay').then((mod) => ({ default: mod.QRExportOverlay })),
+  { ssr: false }
+);
 
 const ALL_BATCHES = 'all';
 
@@ -156,6 +156,7 @@ export default function SerialNumbersPage() {
     setDownloadProgress({ current: 0, total: 1 });
 
     try {
+      const { downloadSingleQR } = await import('@/lib/qr-export');
       await downloadSingleQR(
         `${baseUrl}/verify/${serial.serialNumber}`,
         product.name,
@@ -197,6 +198,7 @@ export default function SerialNumbersPage() {
     setDownloadProgress({ current: 0, total: serialsForDownload.length });
 
     try {
+      const { exportQRCodes } = await import('@/lib/qr-export');
       await exportQRCodes({
         productName: product.name,
         productSlug: product.slug,

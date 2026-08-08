@@ -1,7 +1,3 @@
-import QRCode from 'qrcode';
-import { jsPDF } from 'jspdf';
-import JSZip from 'jszip';
-
 export type QRExportFormat = 'pdf' | 'zip' | 'png';
 
 export interface QRExportItem {
@@ -21,12 +17,15 @@ export interface QRExportOptions {
 
 const CANVAS_SIZE = 800;
 const TEXT_AREA_HEIGHT = 130;
-
-/** One QR code per A4 page for easy print-and-cut. */
-export const QR_CODES_PER_A4_PAGE = 1;
 const PDF_PAGE_WIDTH = 210;
 const PDF_PAGE_HEIGHT = 297;
 const PDF_MARGIN = 15;
+
+function assertBrowser() {
+  if (typeof window === 'undefined') {
+    throw new Error('QR export is only available in the browser');
+  }
+}
 
 function sanitizeFilename(value: string): string {
   return value.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
@@ -46,6 +45,9 @@ export async function createQRCanvas(
   productName: string,
   serialNumber: string
 ): Promise<HTMLCanvasElement> {
+  assertBrowser();
+
+  const QRCode = (await import('qrcode')).default;
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_SIZE;
   canvas.height = CANVAS_SIZE + TEXT_AREA_HEIGHT;
@@ -128,6 +130,7 @@ async function exportAsPdf(
   items: QRExportItem[],
   onProgress?: (current: number, total: number) => void
 ) {
+  const { jsPDF } = await import('jspdf');
   const canvases = await generateAllCanvases(productName, items, onProgress);
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -160,6 +163,7 @@ async function exportAsZip(
   items: QRExportItem[],
   canvases: HTMLCanvasElement[]
 ) {
+  const JSZip = (await import('jszip')).default;
   const zip = new JSZip();
 
   for (let i = 0; i < items.length; i++) {
@@ -188,6 +192,8 @@ async function exportAsSeparatePngs(
 }
 
 export async function exportQRCodes(options: QRExportOptions): Promise<void> {
+  assertBrowser();
+
   const { productName, productSlug, items, format, batchLabel, onProgress } = options;
 
   if (items.length === 0) {
@@ -210,16 +216,6 @@ export async function exportQRCodes(options: QRExportOptions): Promise<void> {
   await exportAsSeparatePngs(productSlug, items, canvases);
 }
 
-export function getUniqueBatches(
-  serialNumbers: Array<{ batchNumber?: string; status: string }>
-): string[] {
-  const batches = new Set<string>();
-  serialNumbers
-    .filter((s) => s.status === 'active' && s.batchNumber)
-    .forEach((s) => batches.add(s.batchNumber!));
-  return Array.from(batches).sort();
-}
-
 export async function downloadSingleQR(
   verifyUrl: string,
   productName: string,
@@ -227,6 +223,8 @@ export async function downloadSingleQR(
   serialNumber: string,
   batchNumber: string
 ): Promise<void> {
+  assertBrowser();
+
   const canvas = await createQRCanvas(verifyUrl, productName, serialNumber);
   const blob = await canvasToBlob(canvas);
   downloadBlob(blob, buildPngFilename(productSlug, batchNumber, serialNumber));
